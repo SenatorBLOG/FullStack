@@ -38,5 +38,5 @@ const numbers = [1,2,3,4,5];
 const ans = numbers.reduce((prev,curr)=>{
     console.log(`Prev: ${prev} and current ${curr}`);
     return prev+curr;
-},0)
+},1)
 console.log(ans);
