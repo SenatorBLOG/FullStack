@@ -1,0 +1,12 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.player{
+  background-color: lightcoral;
+  margin: 1em auto;
+  width:50%;
+}
