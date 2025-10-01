@@ -20,3 +20,36 @@ export const createMovieObject = (title,year,genre,rating,duration) => {
     return newMovie
 }
 
+//Spread operator e.iv - Collect function arguments using rest parameters
+export const logSelectedMovies = (...movieTitles) => {
+    console.log('You selected: ' + movieTitles.join(', '));
+}
+// Step 3 
+import { movies } from './movies.js';
+export const addWatchedFlag = () => {
+    return movies.map(movie => ({
+        ...movie,
+        watched: false
+    }));
+};
+export const getMoviesAfter = ( year) => {
+    return movies.filter(movie => movie.year > year);
+};
+export const getAverageRating = () => {
+    if (movies.length === 0) return 0;
+    const totalRating = movies.reduce((sum, movie) => sum + movie.rating, 0);
+    return totalRating / movies.length;
+};
+
+export const findMovie = (title) => {
+    return movies.find(movie => movie.title.toLowerCase() === title.toLowerCase());
+};
+export const areAllAbove = (rating) => {
+    return movies.every(movie => movie.rating > rating);
+};
+export const getMoviesByGenre = (genre) => {
+    return movies.filter(movie => movie.genre.toLowerCase() === genre.toLowerCase());
+}
+export const getLongestMovie = () => {
+    return movies.reduce((longest, movie) => movie.duration > longest.duration ? movie : longest, movies[0]);
+}
