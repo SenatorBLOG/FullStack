@@ -1,0 +1,23 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* The following directives require Tailwind CSS processing. 
+   If you see errors, ensure your build tool (like PostCSS with Tailwind) is configured. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your CSS variables and global rules AFTER Tailwind directives */
+:root {
+  --background: #0A0F1F;
+  --ocean-title: #70B8FF;
+  --ocean-subtitle: #88AACC;
+  --font-size: 16px;
+}
+html { font-size: var(--font-size); }
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  background: var(--background);
+  color: #fff;
+}
