@@ -1,5 +1,7 @@
+// SessionStats.tsx
 import { Card } from './ui/card';
 import { Clock, Target, Calendar } from 'lucide-react';
+
 
 interface SessionStatsProps {
   currentSession: {

@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from 'react';
+// BreathingPage.tsx
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BreathingCircle } from '../components/BreathingCircle';
 import { SessionControls } from '../components/SessionControls';
 import { SessionStats } from '../components/SessionStats';
+import ActivityChart from '../components/charts/AnnualProgressChart';
 import { Wind } from 'lucide-react';
-
-interface Session {
-  _id?: string;
-  date: string;
-  time: number;
-  cycles: number;
-  duration: number;
-}
+import NavBar from '../components/NavBar';
 
 export default function BreathingPage() {
   const [isActive, setIsActive] = useState(false);
@@ -25,22 +20,8 @@ export default function BreathingPage() {
   });
 
   useEffect(() => {
-    fetchSessions();
+    fetchTotalStats();
   }, []);
-
-  const fetchSessions = async () => {
-    try {
-      const res = await axios.get<Session[]>('http://localhost:5000/api/sessions');
-      const sessions = res.data;
-      setTotalStats({
-        totalSessions: sessions.length,
-        totalMinutes: sessions.reduce((acc: number, sess: Session) => acc + Math.floor(sess.time / 60), 0),
-        streak: calculateStreak(sessions),
-      });
-    } catch (err) {
-      console.error('Error fetching sessions:', err);
-    }
-  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -56,6 +37,15 @@ export default function BreathingPage() {
     };
   }, [isActive]);
 
+  const fetchTotalStats = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/stats/overview');
+      setTotalStats(res.data);
+    } catch (err) {
+      console.error('Error fetching total stats:', err);
+    }
+  };
+
   const handleToggle = () => {
     setIsActive(prev => !prev);
   };
@@ -69,7 +59,7 @@ export default function BreathingPage() {
       };
       try {
         await axios.post('http://localhost:5000/api/sessions', newSession);
-        fetchSessions(); // Обновляем stats
+        fetchTotalStats(); // Update stats after save
       } catch (err) {
         console.error('Error saving session:', err);
       }
@@ -88,31 +78,15 @@ export default function BreathingPage() {
     setDuration(newDuration);
   };
 
-  const calculateStreak = (sessions: Session[]) => {
-    if (sessions.length === 0) return 0;
-    const sorted = [...sessions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    let streak = 1;
-    let currentDate = new Date(sorted[0].date).setHours(0,0,0,0);
-    for (let i = 1; i < sorted.length; i++) {
-      const prevDate = new Date(sorted[i].date).setHours(0,0,0,0);
-      if ((currentDate - prevDate) / (1000 * 60 * 60 * 24) === 1) {
-        streak++;
-        currentDate = prevDate;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  };
-
   return (
     <div 
-      className="min-h-screen p-6"
+      className="min-h-screen"
       style={{ 
         background: `radial-gradient(ellipse at center, var(--ocean-glow-background) 0%, var(--background) 50%)`,
       }}
     >
-      <div className="max-w-4xl mx-auto space-y-8">
+      <NavBar />
+      <div className="max-w-4xl mx-auto space-y-8 mt-10">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 mb-4">

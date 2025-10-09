@@ -1,3 +1,4 @@
+// SessionControls.tsx
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -7,7 +8,7 @@ interface SessionControlsProps {
   isActive: boolean;
   duration: number;
   onToggle: () => void;
-  onReset: () => void;
+  onReset: () => Promise<void> | void;
   onDurationChange: (value: number) => void;
 }
 

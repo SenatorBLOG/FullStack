@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import BreathingPage from './pages/BreathingPage';
 import LoginPage from './pages/LoginPage';
 import StatsPage from './pages/StatsPage';
+import './index.css';
 // import { Footer } from './components/Footer';
 
 export default function App() {
