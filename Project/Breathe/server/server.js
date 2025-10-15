@@ -24,7 +24,9 @@ mongoose
 // routes
 const sessionsRouter = require('./routes/sessions');
 const statsRouter = require('./routes/stats');
+const authRouter = require('./routes/auth');
 
+app.use('/api/auth', authRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/stats', statsRouter);
 

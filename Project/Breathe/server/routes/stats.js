@@ -2,29 +2,38 @@
 const express = require('express');
 const router = express.Router();
 const Session = require('../models/Session');
-const mongoose = require('mongoose');
+
+// Utility to ensure we always handle empty/undefined values safely
+const toMinutes = (value) => {
+  const n = Number(value);
+  if (Number.isNaN(n) || n < 0) return 0;
+  return n;
+};
 
 // GET /api/stats/overview
 // returns totalSessions, totalMinutes, streak, averageSession
 router.get('/overview', async (req, res) => {
   try {
-    const sessions = await Session.find().sort({ date: -1 }).lean();
+    const sessions = await Session.find().sort({ sessionDate: -1 }).lean();
 
     const totalSessions = sessions.length;
-    const totalMinutes = sessions.reduce((acc, s) => acc + Math.floor((s.time || 0) / 60), 0);
+    const totalMinutes = sessions.reduce((acc, s) => acc + toMinutes(s.sessionLength || 0), 0);
     const averageSession = totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0;
 
     // compute streak (consecutive days ending today)
-    const days = sessions.map(s => new Date(s.date).setHours(0,0,0,0));
+    const days = sessions
+      .map(s => new Date(s.sessionDate || s.createdAt || Date.now()).setHours(0,0,0,0))
+      .sort((a,b) => b - a);
+
     let streak = 0;
     if (days.length) {
       let expected = new Date().setHours(0,0,0,0);
-      for (let d of days) {
+      for (let d of Array.from(new Set(days))) { // unique days
         if (d === expected) {
           streak++;
           expected = expected - 24*60*60*1000;
-        } else if (d < expected) { // skip older day (we require exact consecutive)
-          break;
+        } else if (d < expected) {
+          break; // streak broken
         }
       }
     }
@@ -44,41 +53,28 @@ router.get('/weekly', async (req, res) => {
     start.setHours(0,0,0,0);
     start.setDate(start.getDate() - 6); // 7-day window: start .. today
 
-    // Aggregation: group by date (day) and sum 'time'
-    const data = await Session.aggregate([
-      { $match: { date: { $gte: start } } },
-      {
-        $project: {
-          day: {
-            $dateToString: { format: "%Y-%m-%d", date: "$date" }
-          },
-          minutes: { $divide: ["$time", 60] },
-          sessions: 1
-        }
-      },
-      {
-        $group: {
-          _id: "$day",
-          totalMinutes: { $sum: "$minutes" },
-          sessionCount: { $sum: 1 }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
+    const sessions = await Session.find({ sessionDate: { $gte: start } }).lean();
 
-    // Build last 7 days map with day names
     const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+    // Build map for last 7 days
     const result = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(start);
       d.setDate(start.getDate() + i);
       const key = d.toISOString().slice(0,10);
-      const found = data.find(x => x._id === key);
+
+      const minutes = sessions
+        .filter(s => new Date(s.sessionDate).toISOString().slice(0,10) === key)
+        .reduce((acc, s) => acc + toMinutes(s.sessionLength || 0), 0);
+
+      const sessionCount = sessions.filter(s => new Date(s.sessionDate).toISOString().slice(0,10) === key).length;
+
       result.push({
         date: key,
         day: dayNames[d.getDay()],
-        minutes: found ? Math.round(found.totalMinutes) : 0,
-        sessions: found ? found.sessionCount : 0
+        minutes: Math.round(minutes),
+        sessions: sessionCount,
       });
     }
 
@@ -95,41 +91,31 @@ router.get('/monthly', async (req, res) => {
     const today = new Date();
     const start = new Date(today.getFullYear(), today.getMonth() - 11, 1);
 
-    const data = await Session.aggregate([
-      { $match: { date: { $gte: start } } },
-      {
-        $project: {
-          year: { $year: "$date" },
-          month: { $month: "$date" },
-          minutes: { $divide: ["$time", 60] },
-          cycles: "$cycles"
-        }
-      },
-      {
-        $group: {
-          _id: { year: "$year", month: "$month" },
-          totalMinutes: { $sum: "$minutes" },
-          totalSessions: { $sum: 1 },
-          totalCycles: { $sum: "$cycles" }
-        }
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1 } }
-    ]);
+    const sessions = await Session.find({ sessionDate: { $gte: start } }).lean();
 
-    // Build last 12 months map
-    const result = [];
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+    const result = [];
     for (let i = 0; i < 12; i++) {
       const d = new Date(today.getFullYear(), today.getMonth() - 11 + i, 1);
-      const found = data.find(x => x._id.year === d.getFullYear() && x._id.month === d.getMonth() + 1);
+      const year = d.getFullYear();
+      const month = d.getMonth();
+
+      const monthlySessions = sessions.filter(s => {
+        const sd = new Date(s.sessionDate);
+        return sd.getFullYear() === year && sd.getMonth() === month;
+      });
+
+      const minutes = monthlySessions.reduce((acc, s) => acc + toMinutes(s.sessionLength || 0), 0);
+      const cycles = monthlySessions.reduce((acc, s) => acc + (Number(s.cycles) || 0), 0);
+
       result.push({
-        month: monthNames[d.getMonth()],
-        year: d.getFullYear(),
-        minutes: found ? Math.round(found.totalMinutes) : 0,
-        sessions: found ? found.totalSessions : 0,
-        cycles: found ? found.totalCycles : 0
+        month: monthNames[month],
+        year,
+        minutes: Math.round(minutes),
+        sessions: monthlySessions.length,
+        cycles,
       });
     }
 
@@ -140,35 +126,22 @@ router.get('/monthly', async (req, res) => {
 });
 
 // GET /api/stats/mood
-// returns mood distribution from sessions
+// returns mood distribution inferred from moodBefore/moodAfter
 router.get('/mood', async (req, res) => {
   try {
-    const data = await Session.aggregate([
-      { $match: { mood: { $ne: '' } } },
-      {
-        $group: {
-          _id: "$mood",
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { count: -1 } }
-    ]);
-
-    // Categorize moods into positive, neutral, negative
-    const positiveWords = ['happy', 'calm', 'peaceful', 'relaxed', 'good', 'great', 'excellent', 'wonderful', 'amazing', 'joyful'];
-    const negativeWords = ['stressed', 'anxious', 'tired', 'sad', 'angry', 'frustrated', 'overwhelmed', 'bad', 'terrible', 'awful'];
+    const sessions = await Session.find({
+      moodBefore: { $exists: true },
+      moodAfter: { $exists: true },
+    }).lean();
 
     let positive = 0, neutral = 0, negative = 0;
 
-    data.forEach(item => {
-      const mood = item._id.toLowerCase();
-      if (positiveWords.some(word => mood.includes(word))) {
-        positive += item.count;
-      } else if (negativeWords.some(word => mood.includes(word))) {
-        negative += item.count;
-      } else {
-        neutral += item.count;
-      }
+    sessions.forEach(s => {
+      const before = Number(s.moodBefore) || 0;
+      const after = Number(s.moodAfter) || 0;
+      if (after > before) positive++;
+      else if (after < before) negative++;
+      else neutral++;
     });
 
     const total = positive + neutral + negative;
@@ -198,7 +171,7 @@ router.get('/sessions-breakdown', async (req, res) => {
     };
 
     sessions.forEach(session => {
-      const minutes = Math.floor(session.time / 60);
+      const minutes = toMinutes(session.sessionLength || 0);
       if (minutes <= 5) breakdown.short++;
       else if (minutes <= 15) breakdown.medium++;
       else if (minutes <= 30) breakdown.long++;
@@ -225,36 +198,35 @@ router.get('/progress', async (req, res) => {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const data = await Session.aggregate([
-      { $match: { date: { $gte: sixMonthsAgo } } },
-      {
-        $project: {
-          year: { $year: "$date" },
-          month: { $month: "$date" },
-          minutes: { $divide: ["$time", 60] }
-        }
-      },
-      {
-        $group: {
-          _id: { year: "$year", month: "$month" },
-          avgSessionLength: { $avg: "$minutes" },
-          totalMinutes: { $sum: "$minutes" },
-          sessionCount: { $sum: 1 }
-        }
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1 } }
-    ]);
+    const sessions = await Session.find({ sessionDate: { $gte: sixMonthsAgo } }).lean();
+
+    // group by year-month
+    const map = new Map();
+    sessions.forEach(s => {
+      const d = new Date(s.sessionDate);
+      const key = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
+      const minutes = toMinutes(s.sessionLength || 0);
+      if (!map.has(key)) map.set(key, { totalMinutes: 0, sessionCount: 0 });
+      const entry = map.get(key);
+      entry.totalMinutes += minutes;
+      entry.sessionCount += 1;
+    });
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    const result = data.map(item => ({
-      month: monthNames[item._id.month - 1],
-      year: item._id.year,
-      avgSessionLength: Math.round(item.avgSessionLength * 10) / 10,
-      totalMinutes: Math.round(item.totalMinutes),
-      sessionCount: item.sessionCount
-    }));
+    const result = Array.from(map.entries())
+      .sort((a,b) => a[0].localeCompare(b[0]))
+      .map(([key, data]) => {
+        const [year, month] = key.split('-').map(Number);
+        return {
+          month: monthNames[month - 1],
+          year,
+          avgSessionLength: data.sessionCount ? Math.round((data.totalMinutes / data.sessionCount) * 10) / 10 : 0,
+          totalMinutes: Math.round(data.totalMinutes),
+          sessionCount: data.sessionCount
+        };
+      });
 
     res.json(result);
   } catch (err) {

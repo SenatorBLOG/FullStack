@@ -1,64 +1,44 @@
 import React from 'react';
 import WeeklyActivityChart from '../components/charts/WeeklyActivityChart';
 import AnnualProgressChart from '../components/charts/AnnualProgressChart';
-import MetricCards from '../components/charts/MetricCards';
-import MetricCards2 from '../components/charts/MetricCards2';
-import MoodQualificationChart from '../components/charts/MoodQualificationChart';
+import StatsCards from '../components/charts/StatsCards';
+import MoodTrackingGrid from '../components/charts/MoodTrackingGrid';
 import MonthlyActivityChart from '../components/charts/MonthlyActivityChart';
 import NavBar from '../components/NavBar';
 import { Footer } from '../components/footer';
 
 export default function StatsPage() {
   return (
-    <div className=" w-full min-h-screen ">
+    <div className="w-full min-h-screen">
       <NavBar />
-      {/* Main Content Container matching Figma design */}
-      <div
-        className="inline-flex px-[37px] pt-0 pb-[42px] flex-col items-center absolute left-[181px] top-[125px]"
-        style={{ width: '1100px', height: '2820px' }}
-      >
-        <div
-          className="flex w-[1009px] px-0 py-[15px] flex-col items-start gap-[75px] absolute left-[54px] top-0"
-          style={{ height: '2778px' }}
-        >
+      <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 space-y-10">
+        {/* How it works */}
+        <div className="space-y-3">
+          <h2 className="text-2xl md:text-3xl font-normal text-[#70B8FF]">How it works?</h2>
+          <p className="text-base md:text-lg max-w-3xl text-[#88AACC]">
+            Breathe guides you through calming breathing exercises with a visual cue — a softly expanding and contracting circle. Just follow its rhythm: inhale as it grows, exhale as it shrinks. In a few minutes, you'll feel more relaxed, focused, and balanced.
+          </p>
+        </div>
 
-          {/* How it works section */}
-          <div className="flex flex-col justify-center items-start relative">
-            <div
-              className="text-center font-montserrat text-[36px] font-normal leading-normal relative mb-6"
-              style={{ color: '#70B8FF' }}
-            >
-              How it works?
-            </div>
-            <div
-              className="font-montserrat text-[20px] font-normal leading-normal relative max-w-[900px]"
-              style={{ color: '#88AACC' }}
-            >
-              Breathe guides you through calming breathing exercises with a visual cue — a softly expanding and contracting circle. Just follow its rhythm: inhale as it grows, exhale as it shrinks. In a few minutes, you'll feel more relaxed, focused, and balanced.
-            </div>
-          </div>
-
-          {/* Weekly Activity Chart (Chart 3 - Main blue chart) */}
+        {/* Weekly Activity */}
+        <div className="w-full">
           <WeeklyActivityChart />
+        </div>
 
-          {/* Annual Progress Chart (Chart 9 - Stacked bars with line) */}
+        {/* Annual Progress */}
+        <div className="w-full">
           <AnnualProgressChart />
+        </div>
 
-          {/* Three Metric Cards Row (Charts 6, 5, 4) */}
-          {/* <MetricCards /> */}
-          <MetricCards2/>
-          
+        {/* Metric Cards */}
+        <div className="w-full">
+          <StatsCards />
+        </div>
 
-
-          {/* Bottom Row with two charts */}
-          <div className="flex items-start gap-[6px] w-full">
-            {/* Mood Qualification Chart (Chart 6 - Horizontal bars) */}
-            <MoodQualificationChart />
-
-            {/* Monthly Activity Pie Chart (Chart 10 - Donut chart) */}
-            <MonthlyActivityChart />
-          </div>
-
+        {/* Bottom charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+          <div className="w-full"><MoodTrackingGrid /></div>
+          <div className="w-full"><MonthlyActivityChart /></div>
         </div>
       </div>
       {/* <Footer /> */}

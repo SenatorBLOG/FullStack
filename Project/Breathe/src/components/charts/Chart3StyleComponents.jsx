@@ -26,22 +26,22 @@ export const Chart3Colors = {
 
 };
 
-// Chart 3 Blue Container (like the original Chart 3)
+
 export const Chart3BlueContainer = ({ children, title, subtitle, className = "", width = "100%", height = "425px", variant = "blue" }) => (
   <div className={`relative ${className}`} style={{ width, height }}>
     <div 
-      className="w-full h-full rounded-[20px]"
+      className="w-full h-full rounded-[20px] relative overflow-hidden"
       style={{ 
         background: Chart3Colors.background,
         boxShadow: Chart3Colors.shadow 
       }}
     >
-      {/* Header */}
+      {/* Header (оставляем как есть, absolute) */}
       {(title || subtitle) && (
-        <div className="absolute left-[66px] top-[33px]">
+        <div className="absolute left-[66px] top-[18px] z-10">
           {subtitle && (
             <div 
-              className="text-[18px] font-normal leading-[20px] mb-1"
+              className="text-[14px] md:text-[18px] font-normal leading-[20px] mb-1"
               style={{ color: Chart3Colors.textSecondary }}
             >
               {subtitle}
@@ -49,7 +49,7 @@ export const Chart3BlueContainer = ({ children, title, subtitle, className = "",
           )}
           {title && (
             <div 
-              className="text-[22px] font-bold leading-[28px]"
+              className="text-[18px] md:text-[22px] font-bold leading-[28px]"
               style={{ color: Chart3Colors.textPrimary }}
             >
               {title}
@@ -57,10 +57,25 @@ export const Chart3BlueContainer = ({ children, title, subtitle, className = "",
           )}
         </div>
       )}
-      {children}
+
+      {/* Контент внутри container — с верхним отступом, чтобы не наезжать на header */}
+      <div
+        className="w-full h-full box-border"
+        style={{
+          paddingTop: 20,   // <-- резервируем пространство под header (подправь если header выше/ниже)
+          paddingLeft: 20,
+          paddingRight: 20,
+          paddingBottom: 20,
+        }}
+      >
+        {children}
+      </div>
     </div>
   </div>
 );
+
+export default Chart3BlueContainer;
+
 
 // Custom Tooltip styled like Chart 3
 export const Chart3Tooltip = ({ active, payload, label }) => {
@@ -180,50 +195,12 @@ export const Chart3PieChart = ({ data, className = "", ...props }) => {
   );
 };
 
-// Chart 3 Metric Card
-export const Chart3MetricCard = ({ title, subtitle, value, change, 
-    changeType = 'neutral', // 'positive'|'negative'|'neutral'
-   icon, width = "332px", height = "225px",children }) => (
-  <Chart3BlueContainer title={title} subtitle={subtitle} width={width} height={height}>
-    <div className="absolute left-[33px] bottom-[33px]">
-      <div 
-        className="text-[44px] font-bold leading-[52px] mb-2"
-        style={{ color: '#1E1B39' }}
-      >
-        {value}
-      </div>
-      {change && (
-        <div className="flex items-center gap-2">
-          <span 
-            className="text-[14px] font-normal leading-[16px]"
-            style={{ color: changeType === 'positive' ? '#04CE00' : '#FF718B' }}
-          >
-            {changeType === 'positive' ? '+' : ''}{change}%
-          </span>
-          <div 
-            className="w-[15px] h-[10px]"
-            style={{ 
-              background: changeType === 'positive' ? '#04CE00' : '#FF718B',
-              transform: changeType === 'positive' ? 'rotate(0deg)' : 'rotate(180deg)'
-            }}
-          />
-        </div>
-      )}
-    </div>
-    {icon && (
-      <div className="absolute right-[33px] top-[50%] transform -translate-y-1/2">
-        {icon}
-      </div>
-    )}
-    {children}
-  </Chart3BlueContainer>
-);
 
 export const Chart3Dropdown = ({ value, onChange, options, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Закрытие меню при клике вне области
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -297,5 +274,3 @@ export const Chart3Dropdown = ({ value, onChange, options, className = "" }) => 
     </div>
   );
 };
-
-
