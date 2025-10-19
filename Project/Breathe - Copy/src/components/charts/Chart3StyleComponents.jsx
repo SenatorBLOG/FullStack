@@ -195,44 +195,6 @@ export const Chart3PieChart = ({ data, className = "", ...props }) => {
   );
 };
 
-// Chart 3 Metric Card
-export const Chart3MetricCard = ({ title, subtitle, value, change, 
-    changeType = 'neutral', // 'positive'|'negative'|'neutral'
-   icon, width = "332px", height = "225px",children }) => (
-  <Chart3BlueContainer title={title} subtitle={subtitle} width={width} height={height}>
-    <div className="absolute left-[33px] bottom-[33px]">
-      <div 
-        className="text-[44px] font-bold leading-[52px] mb-2"
-        style={{ color: '#1E1B39' }}
-      >
-        {value}
-      </div>
-      {change && (
-        <div className="flex items-center gap-2">
-          <span 
-            className="text-[14px] font-normal leading-[16px]"
-            style={{ color: changeType === 'positive' ? '#04CE00' : '#FF718B' }}
-          >
-            {changeType === 'positive' ? '+' : ''}{change}%
-          </span>
-          <div 
-            className="w-[15px] h-[10px]"
-            style={{ 
-              background: changeType === 'positive' ? '#04CE00' : '#FF718B',
-              transform: changeType === 'positive' ? 'rotate(0deg)' : 'rotate(180deg)'
-            }}
-          />
-        </div>
-      )}
-    </div>
-    {icon && (
-      <div className="absolute right-[33px] top-[50%] transform -translate-y-1/2">
-        {icon}
-      </div>
-    )}
-    {children}
-  </Chart3BlueContainer>
-);
 
 export const Chart3Dropdown = ({ value, onChange, options, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -312,5 +274,3 @@ export const Chart3Dropdown = ({ value, onChange, options, className = "" }) => 
     </div>
   );
 };
-
-

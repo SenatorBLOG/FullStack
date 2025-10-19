@@ -169,7 +169,7 @@ const AnnualProgressChart = ({ currentSession = null }) => {
 
   // render
   return (
-    <Chart3BlueContainer title={ view === 'Yearly summary' ? 'Yearly meditation' : 'Last 12 months' } subtitle="Statistics" width="1009px" height="384px">
+    <Chart3BlueContainer title={ view === 'Yearly summary' ? 'Yearly meditation' : 'Last 12 months' } subtitle="Statistics" width="100%" height="384px">
       {/* Dropdown Selector */}
       <div className="absolute right-[65px] top-[38px]">
         <Chart3Dropdown

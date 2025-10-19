@@ -1,0 +1,9 @@
+[
+  { "id": 1,
+   "text": "Купить продукты", "priority": "Low",
+   "img": "task-1.jpg" },
+  { "id": 2, "text": "Завершить React-задание", "priority": "High",
+   "img": "task-2.jpg" },
+  { "id": 3, "text": "Позвонить другу", "priority": "Medium",
+   "img": "task-3.jpg" }
+]

@@ -66,7 +66,7 @@ const ActivityChart = () => {
     <Chart3BlueContainer
       title={`${period} Meditation`}
       subtitle="Activity"
-      width="1009px"
+      width="100%"
       height="425px"
     >
       {/* Dropdown */}

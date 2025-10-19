@@ -51,20 +51,7 @@ export default function BreathingPage() {
   };
 
   const handleReset = async () => {
-    if (sessionTime > 0) {
-      const newSession = {
-        time: sessionTime,
-        cycles,
-        duration,
-      };
-      try {
-        await axios.post('http://localhost:5000/api/sessions', newSession);
-        fetchTotalStats(); // Update stats after save
-      } catch (err) {
-        console.error('Error saving session:', err);
-      }
-    }
-
+    // Removed automatic session creation to avoid unauthorized posts and duplicate sessions.
     setIsActive(false);
     setSessionTime(0);
     setCycles(0);
