@@ -1,0 +1,37 @@
+[
+  {
+    "id": "c1f2a3e4-b5d6-7c89-a0b1-e2f3a4d5e6f7",
+    "title": "Марс (Красная Планета)",
+    "color": "#D74E3C",
+    "rating": 4,
+    "img": "mars.jpg"
+  },
+  {
+    "id": "d9b8c7a6-f5e4-d3c2-b1a0-9876543210fe",
+    "title": "Юпитер (Газовый Гигант)",
+    "color": "#D8A35D",
+    "rating": 5,
+    "img": "jupiter.jpg"
+  },
+  {
+    "id": "e3f4d5c6-b7a8-9012-3456-7890abcdefab",
+    "title": "Сатурн (Планета Колец)",
+    "color": "#C7B387",
+    "rating": 4,
+    "img": "saturn.jpg"
+  },
+  {
+    "id": "a2b3c4d5-e6f7-8901-2345-67890abcdeff",
+    "title": "Уран (Ледяной Гигант)",
+    "color": "#A0D8D8",
+    "rating": 2,
+    "img": "uranus.jpg"
+  },
+  {
+    "id": "f0e1d2c3-b4a5-6789-0123-456789abcdef",
+    "title": "Земля (Голубая Точка)",
+    "color": "#3D8DFF",
+    "rating": 5,
+    "img": "earth.jpg"
+  }
+]
