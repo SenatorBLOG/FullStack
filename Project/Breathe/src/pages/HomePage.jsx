@@ -1,5 +1,6 @@
 import React from 'react';
 import NavBar from '../components/NavBar';
+import {Footer} from '../components/Footer';
 import { Link } from 'react-router-dom';
 
 export default function HomePage() {
@@ -141,13 +142,7 @@ export default function HomePage() {
         </section>
 
         {/* Footer */}
-        <footer className="w-full py-4 bg-[rgba(10,15,31,0.9)] mt-auto">
-          <img
-            src="https://api.builder.io/api/v1/image/assets/TEMP/70adf0aa2be2ed78dbc91b7d2350387bee86b5a2?width=2880"
-            alt="Footer"
-            className="w-full h-16 object-cover"
-          />
-        </footer>
+        <Footer />
       </div>
     </div>
   );

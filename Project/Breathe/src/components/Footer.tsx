@@ -1,84 +1,64 @@
+// src/components/Footer.tsx
 import React from "react";
-// import { GooglePlay } from "./GooglePlay";
-// import { InstagramLink } from "./InstagramLink";
-// import { ShareLink } from "./ShareLink";
-// import logoImgMeditation11 from "./logo-img-meditation-1-1.png";
-// import path from "./path.svg";
-// import vector1 from "./vector-1.svg";
+import { Link } from "react-router-dom";
+import { FaInstagram, FaGithub, FaEnvelope } from "react-icons/fa";
 
-export const Footer = () => {
+export function Footer() {
   return (
-    <div className="relative w-[1440px] h-[65px]">
-      <div className="absolute -top-0.5 left-0 w-[1440px] h-[67px] bg-[#090f20]" />
-
-      <img
-        className="absolute -top-0.5 left-0 w-[1440px] h-px object-cover"
-        alt="Vector"
-        // src={vector1}
-      />
-
-      <div className="inline-flex h-[66px] items-center justify-center gap-4 absolute -top-0.5 left-[499px]">
-        <div className="relative w-fit [font-family:'Inter-Regular',Helvetica] font-normal text-[#70b8ff] text-sm tracking-[0] leading-[normal]">
-          Goals &amp; Intentions
+    <footer className="w-full bg-[#0A0F1F] text-[#9CCBFF] border-t border-[#1E2F4F] py-3 px-6 mt-20">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Left Section */}
+        <div className="flex flex-col items-center md:items-start">
+          <Link
+            to="/breathing"
+            className="text-[#BCDDFF] text-lg font-medium hover:text-white transition-colors"
+          >
+            Breathe
+          </Link>
+          <p className="text-xs text-[#7FADEB] mt-0.5">
+            © {new Date().getFullYear()} Breathe. All rights reserved.
+          </p>
         </div>
 
-        <div className="relative w-fit [font-family:'Inter-Regular',Helvetica] font-normal text-[#70b8ff] text-sm tracking-[0] leading-[normal]">
-          Integrations &amp; Devices
+        {/* Center Navigation Links */}
+        <div className="flex flex-wrap justify-center gap-5 text-xs">
+          <Link to="/profile" className="hover:text-white transition-colors">
+            Profile
+          </Link>
+          <Link to="/faq" className="hover:text-white transition-colors">
+            FAQ
+          </Link>
+          <Link to="/support" className="hover:text-white transition-colors">
+            Support
+          </Link>
         </div>
 
-        <div className="relative w-fit [font-family:'Inter-Regular',Helvetica] font-normal text-[#70b8ff] text-sm tracking-[0] leading-[normal]">
-          Supports
-        </div>
-
-        <div className="relative w-fit [font-family:'Inter-Regular',Helvetica] font-normal text-[#70b8ff] text-sm tracking-[0] leading-[normal]">
-          Profile
-        </div>
-
-        <div className="relative w-fit [font-family:'Inter-Regular',Helvetica] font-normal text-[#70b8ff] text-sm tracking-[0] leading-[normal]">
-          FAQ
-        </div>
-      </div>
-
-      <img
-        className="absolute -top-px left-7 w-[65px] h-[65px] aspect-[1] object-cover"
-        alt="Logo img meditation"
-        // src={logoImgMeditation11}
-      />
-
-      <div className="absolute top-1 left-[1209px] w-[117px] h-[46px]">
-        {/* <InstagramLink
-          className="!absolute !top-[21px] !left-0 !w-6 !h-6"
-          color="#70B8FF"
-        />
-        <ShareLink
-          className="!absolute !top-[21px] !left-[92px] !w-[25px] !h-[25px]"
-          color="#70B8FF"
-        /> */}
-        <div className="absolute top-[21px] left-[calc(50.00%_-_28px)] w-6 h-6 bg-[#090f20]">
-          <div className="relative w-[86.96%] h-[86.96%] top-[6.52%] left-[6.52%] flex">
-            <div className="flex-1 w-[20.87px] relative bg-[url(/oval.svg)] bg-[100%_100%]">
-              <img
-                className="absolute w-[54.30%] h-[45.00%] top-[30.10%] left-[18.90%]"
-                alt="Path"
-                // src={path}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute w-[19.66%] h-[50.00%] top-[45.65%] left-[51.28%] bg-[url(/union.svg)] bg-[100%_100%]" />
-
-        <div className="absolute top-0 left-0 w-[86px] [font-family:'Montserrat-Medium',Helvetica] font-medium text-[#98cbff] text-xs tracking-[0] leading-[normal] whitespace-nowrap">
-          Follow us
+        {/* Social Links */}
+        <div className="flex items-center gap-4">
+          <a
+            href="https://instagram.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#9CCBFF] hover:text-white transition-colors"
+          >
+            <FaInstagram size={18} />
+          </a>
+          <a
+            href="https://github.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#9CCBFF] hover:text-white transition-colors"
+          >
+            <FaGithub size={18} />
+          </a>
+          <a
+            href="mailto:support@breatheapp.com"
+            className="text-[#9CCBFF] hover:text-white transition-colors"
+          >
+            <FaEnvelope size={18} />
+          </a>
         </div>
       </div>
-
-      {/* <GooglePlay
-        className="!h-[48.00%] !absolute !left-[71.83%] !w-[8.50%] !top-[26.00%]"
-        group="image.png"
-        groupClassName="!h-[100.00%] !w-[100.00%]"
-        type="black-white"
-      /> */}
-    </div>
+    </footer>
   );
-};
+}

@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 
 export default function StatisticsPreview() {
-  return (
-    <div className="w-full min-h-screen">
-    <NavBar />
+  return (<>
+  <NavBar />
+  <div className="w-full min-h-screen">
     <div className="max-w-4xl mx-auto py-12 space-y-6">
       <h1 className="text-3xl font-bold">Статистика</h1>
       <p className="text-muted">Войдите, чтобы увидеть персональные достижения. Ниже — пример того, что вы получите:</p>
@@ -29,5 +29,8 @@ export default function StatisticsPreview() {
       </div>
       </div>
     </div>
+  
+  </>
+    
   );
 }
