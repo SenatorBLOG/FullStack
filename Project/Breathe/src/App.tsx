@@ -20,6 +20,7 @@ import { AuthProvider } from './components/contexts/AuthContext';
 export default function App() {
   return (
     <Router>
+        
         <AuthProvider>
         <MusicProvider>
             <div className="min-h-screen">
@@ -41,11 +42,9 @@ export default function App() {
                 <Route path="/signup" element={<SignUpPage />} />
                 <Route path="/music-library" element={<MusicLibrary />} />
 
-                {/* catch-all: показываем HomePage или свой 404 */}
+                {/* catch-all:  HomePage or 404 */}
                 <Route path="*" element={<HomePage />} />
             </Routes>
-
-            {/* глобальный плеер — находится вне Routes, поэтому виден на всех страницах */}
             <GlobalAudioPlayer />
             </div>
         </MusicProvider>
