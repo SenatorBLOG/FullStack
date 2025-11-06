@@ -39,7 +39,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolumeState] = useState(70);
+  const [volume, setVolumeState] = useState(80);
   const [isMuted, setIsMutedState] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 

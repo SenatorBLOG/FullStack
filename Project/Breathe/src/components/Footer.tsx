@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FaInstagram, FaGithub, FaEnvelope } from "react-icons/fa";
 
-export function Footer() {
+export default function Footer() {
   return (
     <footer className="w-full bg-[#0A0F1F] text-[#9CCBFF] border-t border-[#1E2F4F] py-3 px-6 mt-20">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">

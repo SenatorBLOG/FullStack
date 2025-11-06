@@ -8,8 +8,8 @@ import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Search, Loader2, RefreshCw } from "lucide-react";
-import { AudioPlayer } from "./AudioPlayer";
 import NavBar from '../NavBar';
+import Footer from "../Footer";
 
 type Track = {
   id: string;
@@ -70,14 +70,13 @@ export function MusicLibrary() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="relative w-full min-h-screen bg-[#001F3F]">
+      
       <NavBar />
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold" style={{ color: 'var(--ocean-title)' }}>
-          Music Library
-        </h1>
-      </div>
 
+      {/* Main Content Wrapper */}
+      <div className="flex-grow py-12 px-4 sm:px-6 lg:px-8 8 flex justify-center">
+      <div className="w-full max-w-6xl space-y-8">
       <Card>
         <CardHeader>
           <CardTitle>Search and Filters</CardTitle>
@@ -87,10 +86,10 @@ export function MusicLibrary() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
+             className="!pl-10"
               placeholder="Search by name, artist, or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
             />
           </div>
 
@@ -130,11 +129,11 @@ export function MusicLibrary() {
           </div>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[600px] pr-4">
+          <ScrollArea className="p-4">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible p-10">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i}>
+                  <Card key={i} className="p-4">
                     <div className="aspect-square w-full rounded-t-lg bg-slate-200" />
                     <CardContent className="p-4 space-y-2">
                       <div className="h-5 w-3/4 bg-slate-200" />
@@ -144,12 +143,16 @@ export function MusicLibrary() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                 {filteredTracks.map(track => (
                   <Card
                     key={track.id}
-                    className={`cursor-pointer transition-all hover:shadow-lg ${currentTrack?.id === track.id ? 'ring-2 ring-purple-500' : ''}`}
-                    onClick={() => playTrack(track)} // используем глобальный playTrack
+                    className={`cursor-pointer transition-all hover:shadow-lg rounded-xl overflow-hiddenp-2 ${
+                      currentTrack?.id === track.id
+                        ? 'ring-2 ring-purple-400 ring-offset-2 ring-offset-[#001F3F]'
+                        : ''
+                    }`}
+                    onClick={() => playTrack(track)}
                   >
                     <div className="aspect-square relative overflow-hidden rounded-t-lg">
                       <img src={track.image} alt={track.name} className="w-full h-full object-cover" />
@@ -182,6 +185,9 @@ export function MusicLibrary() {
           </ScrollArea>
         </CardContent>
       </Card>
+      </div>
+    </div>
+    <Footer/>
     </div>
   );
 }

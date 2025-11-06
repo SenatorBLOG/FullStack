@@ -1,6 +1,6 @@
 import React from 'react';
 import NavBar from '../components/NavBar';
-import {Footer} from '../components/Footer';
+import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 
 export default function HomePage() {
@@ -10,8 +10,7 @@ export default function HomePage() {
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center"
         style={{
-          backgroundImage: "url('https://api.builder.io/api/v1/image/assets/TEMP/175745df7b1fa2da4d7f35faf06da9c88596d815?width=2880')",
-          filter: 'brightness(0.6)'
+          backgroundImage: `url('/public/Background_img_Meditation.jpg')`
         }}
       />
       {/* <div className="absolute inset-0 w-full h-full bg-[rgba(10,15,31,0.77)]" /> */}
@@ -29,7 +28,7 @@ export default function HomePage() {
         </header>
 
         {/* Navigation Bar */}
-        <NavBar className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
+        <NavBar/>
 
         {/* How It Works Section */}
         <section className="flex-grow py-12 px-4 sm:px-6 lg:px-8">

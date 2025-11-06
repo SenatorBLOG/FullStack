@@ -98,12 +98,12 @@ export function GlobalAudioPlayer() {
   };
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return "0:00";
+    if (isNaN(seconds) || seconds === 0) return "0:00"; // Унифицируем отображение для нулевого значения
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
+  
   // Не показывать плеер если нет трека
   if (!currentTrack || !isVisible) {
     return currentTrack ? (
@@ -177,7 +177,7 @@ export function GlobalAudioPlayer() {
                     onValueChange={(vals: number[]) => {
                       handleSeek(vals);
                     }}
-                    className="flex-1"
+                    className="flex-1 h-1"
                   />
                   <span className="text-xs text-muted-foreground min-w-[40px]">
                     {formatTime(duration)}
@@ -199,15 +199,18 @@ export function GlobalAudioPlayer() {
                     <Volume2 className="w-5 h-5" />
                   )}
                 </Button>
+                
                 <Slider
                   value={[isMuted ? 0 : volume]}
+                  defaultValue={[100]}
+                  min={0}
                   max={100}
                   step={1}
                   onValueChange={(vals: number[]) => {
                     const v = Array.isArray(vals) ? vals[0] : Number(vals);
                     setVolume(Number(v));
                   }}
-                  className="w-24 hidden md:block"
+                  className="w-24 md:bw-24 [&>[data-slot=slider-range]]:bg-[#3A82F7]"
                 />
                 <Button
                   variant="ghost"

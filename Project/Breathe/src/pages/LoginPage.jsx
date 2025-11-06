@@ -31,11 +31,11 @@ export default function LoginPage() {
 
   return (
     <div className="relative w-full min-h-screen">
-      {/* Background Image */}
+      {/* Background Image with Overlay */}
       <div 
-        className="absolute inset-0 w-full h-[960px] bg-cover bg-center border border-black shadow-lg"
+        className="absolute inset-0 w-full h-full bg-cover bg-center"
         style={{
-          backgroundImage: "url('https://api.builder.io/api/v1/image/assets/TEMP/175745df7b1fa2da4d7f35faf06da9c88596d815?width=2880')",
+          backgroundImage: `url('/public/Background_img_Meditation.jpg')`
         }}
       />
       
