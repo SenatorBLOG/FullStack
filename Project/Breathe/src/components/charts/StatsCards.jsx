@@ -3,6 +3,7 @@ import api from '../../api';
 import StatCard from './StatCard';
 import { ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Chart3Colors } from './Chart3StyleComponents';
+import { m } from 'framer-motion';
 
 const daysAgo = (n) => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - n); return d; };
 const buildDaysArray = (n) => { const arr=[]; for (let i=n-1;i>=0;i--){ const d=daysAgo(i); arr.push({ key: d.toISOString().slice(0,10), dateObj:d }); } return arr; };
@@ -23,20 +24,22 @@ const parseDateFromSession = (s) => {
 };
 
 const parseMinutesFromSession = (s) => {
-  // try common fields: sessionLength (minutes), time, duration, length
   let v = s.sessionLength ?? s.length ?? s.duration ?? s.time ?? s.minutes ?? 0;
-  if (v == null) v = 0;
-  // if it's a string, try parse
-  if (typeof v === 'string') {
-    const num = Number(v);
-    v = isNaN(num) ? 0 : num;
-  }
-  // heuristic: if value > 720 (12 hours), probably seconds -> convert to minutes
-  if (v > 720) v = Math.round(v / 60);
-  // if value looks like milliseconds (very large), convert
-  if (v > 1000000) v = Math.round(v / 60000);
-  return Math.round(v);
+
+  // если значение в секундах (например 0 < v < 1 минута), переводим в минуты
+  if (v > 0 && v < 1) v = v * 60; // или можешь убрать, если данные уже в минутах
+
+  // большие значения → секунды или миллисекунды
+  if (v > 720) v = v / 60;       // секунды → минуты
+  if (v > 1000000) v = v / 60000; // миллисекунды → минуты
+
+  // округляем до двух знаков после запятой
+  const minutes = Math.round(v * 100) / 100;
+
+  return minutes;
 };
+
+
 
 const parseMoodFromSession = (s) => {
   return s.moodAfter ?? s.mood ?? s.moodBefore ?? s.mood_before ?? null;
@@ -68,25 +71,22 @@ const StatsCards = () => {
     return () => { mounted = false; };
   }, []);
 
-  const dayMap = useMemo(() => {
-    const map = {};
-    sessions.forEach(s => {
-      const dObj = parseDateFromSession(s);
-      if (!dObj) {
-        // optionally log problematic entry for debug (comment out in prod)
-        // console.warn('Skipping session with invalid date', s);
-        return;
-      }
-      const key = dObj.toISOString().slice(0,10);
-      if (!map[key]) map[key] = { minutes:0, sessions:0, moods:[] };
-      const minutes = parseMinutesFromSession(s);
-      map[key].minutes += minutes;
-      map[key].sessions += 1;
-      const mood = parseMoodFromSession(s);
-      if (mood) map[key].moods.push(String(mood).toLowerCase());
-    });
-    return map;
-  }, [sessions]);
+const dayMap = useMemo(() => {
+  const map = {};
+  sessions.forEach(s => {
+    const dObj = parseDateFromSession(s);
+    if (!dObj) return;
+    const key = dObj.toISOString().slice(0,10);
+    if (!map[key]) map[key] = { minutes:0, sessions:0, moods:[] };
+    const minutes = parseMinutesFromSession(s); // точные минуты
+    map[key].minutes += minutes; // суммируем дробные минуты
+    map[key].sessions += 1;
+    const mood = parseMoodFromSession(s);
+    if (mood) map[key].moods.push(String(mood).toLowerCase());
+  });
+  return map;
+}, [sessions]);
+
 
   const last14 = useMemo(()=>buildDaysArray(14), []);
   const last7 = useMemo(()=> last14.slice(7), [last14]);

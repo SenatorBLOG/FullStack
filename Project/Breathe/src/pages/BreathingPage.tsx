@@ -4,6 +4,9 @@ import NavBar from "../components/NavBar";
 import { BreathingCircle, Phase } from "../components/BreathingCircle";
 import { SettingsModal } from "../components/SettingsModal";
 import { VideoBackground } from "../components/VideoBackground";
+import api from '../api';
+import { toast } from 'sonner';
+import { useRef, useEffect } from 'react';
 
 export default function BreathingPage() {
   const [isActive, setIsActive] = useState(false);
@@ -14,6 +17,8 @@ export default function BreathingPage() {
   const [videoSpeed] = useState(1); // base playbackRate is 1; we let VideoBackground tweak up to maxSpeed
   const [videoBrightness, setVideoBrightness] = useState(1.05);
   const [pauseBetween, setPauseBetween] = useState(1.8);
+  const startTimeRef = useRef<number | null>(null);
+  const wasActiveRef = useRef(isActive);
 
   const videos = [
     "/videos/med-01.mp4",
@@ -48,6 +53,49 @@ export default function BreathingPage() {
     const h = window.innerHeight;
     return Math.round(Math.min(w, h) * 0.62);
   }, []);
+
+  // при старте сессии запомним время
+useEffect(() => {
+  if (isActive) {
+    startTimeRef.current = Date.now();
+  } else {
+    // если раньше был активен, а сейчас stop — сохранить сессию
+    if (wasActiveRef.current && startTimeRef.current) {
+      const now = Date.now();
+      const durationMs = now - startTimeRef.current;
+      // сохраняем в минутах с одной десятой точностью
+      const sessionLength = Math.round((durationMs / 60000) * 10) / 10 || 0.1;
+      const payload = {
+        sessionDate: new Date().toISOString(),
+        moodBefore: 5,         // дефолт, т.к. UI не собирает
+        moodAfter: 5,          // можно заменить реальными значениями если соберёшь
+        focusLevel: 5,
+        stressLevel: 5,
+        breathingDepth: 5,
+        calmnessScore: 5,
+        distractionCount: 0,
+        timeOfDay: (new Date()).toLocaleTimeString([], { hour12: false }), // или 'Morning'
+        noiseLevel: 'Quiet',
+        sessionLength,         // минуты (float)
+        cycles,                // из состояния cycles
+        notes: ''
+      };
+
+      (async () => {
+        try {
+          await api.post('/sessions', payload);
+          toast.success('Session saved');
+          // можно обновить локальный стейт/статистику тут если нужно
+        } catch (err:any) {
+          console.error('Failed saving session:', err?.response?.data || err);
+          toast.error('Failed to save session');
+        }
+      })();
+    }
+    startTimeRef.current = null;
+  }
+  wasActiveRef.current = isActive;
+}, [isActive, cycles]); // запускается при смене isActive
 
   return (
     <div className="relative min-h-screen">

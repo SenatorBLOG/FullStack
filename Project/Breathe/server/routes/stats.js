@@ -73,7 +73,7 @@ router.get('/weekly', async (req, res) => {
       result.push({
         date: key,
         day: dayNames[d.getDay()],
-        minutes: Math.round(minutes),
+        minutes: Math.round(minutes * 100) / 100,
         sessions: sessionCount,
       });
     }
@@ -113,7 +113,7 @@ router.get('/monthly', async (req, res) => {
       result.push({
         month: monthNames[month],
         year,
-        minutes: Math.round(minutes),
+        minutes: Math.round(minutes * 100) / 100,
         sessions: monthlySessions.length,
         cycles,
       });
@@ -223,7 +223,7 @@ router.get('/progress', async (req, res) => {
           month: monthNames[month - 1],
           year,
           avgSessionLength: data.sessionCount ? Math.round((data.totalMinutes / data.sessionCount) * 10) / 10 : 0,
-          totalMinutes: Math.round(data.totalMinutes),
+          totalMinutes: Math.round(data.totalMinutes * 100) / 100,
           sessionCount: data.sessionCount
         };
       });
