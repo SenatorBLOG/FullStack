@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 
-// типы фаз дыхания
 export type Phase = "inhale" | "hold" | "exhale" | "pause";
 
 interface PhaseDurations {
@@ -16,11 +15,12 @@ interface BreathingCircleProps {
   isActive: boolean;
   phaseDurations: PhaseDurations;
   onCycleComplete?: () => void;
-  onPhaseChange?: (phase: Phase, intensity: number) => void; // уведомление родителя о фазе
-  size?: number; // размер круга в пикселях
-  minScale?: number; // минимальный размер при сжатии
-  maxScale?: number; // максимальный размер при расширении
-  glowIntensity?: number; // сила свечения (0..1)
+  onPhaseChange?: (phase: Phase, intensity: number) => void;
+  onToggle?: () => void; // 👈 добавлено
+  size?: number;
+  minScale?: number;
+  maxScale?: number;
+  glowIntensity?: number;
 }
 
 export function BreathingCircle({
@@ -28,7 +28,8 @@ export function BreathingCircle({
   phaseDurations,
   onCycleComplete,
   onPhaseChange,
-  size = 600,
+  onToggle,
+  size = 520,
   minScale = 0.7,
   maxScale = 1.12,
   glowIntensity = 1,
@@ -38,39 +39,35 @@ export function BreathingCircle({
   const timeoutRef = useRef<number | null>(null);
   const [cycleCount, setCycleCount] = useState(0);
 
-  // карта интенсивности свечения по фазам
   const intensityByPhase: Record<Phase, number> = {
-    inhale: 1.0,  // максимально ярко
-    hold: 0.92,   // чуть тусклее
-    exhale: 0.45, // гаснет
-    pause: 0.36,  // почти потухло
+    inhale: 1.0,
+    hold: 0.92,
+    exhale: 0.45,
+    pause: 0.36,
   };
 
-  // очистка таймеров при размонтировании
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
       }
     };
   }, []);
 
-  // основной цикл дыхания
   useEffect(() => {
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
 
-    // если не активно — остановка анимации и мягкий reset
     if (!isActive) {
       controls.start({
         scale: 1,
-        boxShadow: `0 16px 80px rgba(20,40,80,0.12)`, // лёгкая подсветка в покое
+        boxShadow: `0 16px 80px rgba(20,40,80,0.12)`,
         transition: { duration: 0.6, ease: "easeOut" },
       });
       setPhase("inhale");
+      setCycleCount(0); // 👈 reset cycle count on pause/stop
       onPhaseChange?.("inhale", intensityByPhase["inhale"]);
       return;
     }
@@ -80,29 +77,23 @@ export function BreathingCircle({
     const runPhase = (p: Phase) => {
       setPhase(p);
       const intensity = intensityByPhase[p];
-      onPhaseChange?.(p, intensity); // оповестить родительский компонент
+      onPhaseChange?.(p, intensity);
 
-      // логика "вдыхаем / выдыхаем"
       const expanding = p === "inhale" || p === "hold";
       const targetScale = expanding ? maxScale : minScale;
-
-      // сила свечения (для glow)
       const glowFactor = expanding ? 1.0 * glowIntensity : 0.5 * glowIntensity;
 
-      // --- НАИБОЛЕЕ ВАЖНЫЙ ЭФФЕКТ GLOW ---
-      // наружное свечение (boxShadow) + внутренний мягкий свет (inset)
       const shadow = `
-        0 40px 180px rgba(80,170,255,${0.12 * glowFactor}),   /* внешний glow */
-        inset 0 0 80px rgba(255,255,255,${0.03 * glowFactor}) /* внутренний soft glow */
+        0 40px 180px rgba(80,170,255,${0.12 * glowFactor}),
+        inset 0 0 80px rgba(255,255,255,${0.03 * glowFactor})
       `;
 
       controls.start({
-        scale: targetScale, // изменение размера круга
-        boxShadow: shadow,  // анимация свечения
+        scale: targetScale,
+        boxShadow: shadow,
         transition: { duration: phaseDurations[p], ease: "easeInOut" },
       });
 
-      // переход к следующей фазе
       timeoutRef.current = window.setTimeout(() => {
         if (p === "pause") {
           setCycleCount((c) => c + 1);
@@ -123,7 +114,6 @@ export function BreathingCircle({
     };
   }, [isActive, phaseDurations, glowIntensity, minScale, maxScale]);
 
-  // подписи для фаз
   const label = {
     inhale: "Inhale",
     hold: "Hold",
@@ -136,44 +126,44 @@ export function BreathingCircle({
   return (
     <div
       className="relative flex items-center justify-center"
-      style={{ width: sizePx, height: sizePx, pointerEvents: "none" }}
+      style={{ width: sizePx, height: sizePx }}
     >
-      {/* === ОСНОВНОЙ КРУГ === */}
+      {/* === КЛИКАБЕЛЬНЫЙ КРУГ === */}
       <motion.div
         animate={controls}
         initial={{ scale: 1 }}
+        whileHover={{ scale: 1.03, filter: "brightness(1.06)" }} // 💡 hover чуть светлее
+        whileTap={{ scale: 0.97, filter: "brightness(1.15)" }}
+        onClick={onToggle} // 👈 клик запускает / останавливает дыхание
         style={{
           width: sizePx,
           height: sizePx,
-          borderRadius: "9999px", // делает форму круга
-          zIndex: 5,
+          borderRadius: "9999px",
+          cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-
-          // 🔵 ФОН КРУГА
-          // тут задаётся его цвет, глубина и блик
           background: `
             radial-gradient(
-              rgba(112,184,255,0.35) 20%,     /* центр — белый свет */
-              rgba(101,168,255,0.7) 80%,    /* мягкий голубой */
-              rgba(112,184,255,1) 36%,    /* голубой ореол */
-              rgba(255,255,255,1) 100%         /* край — почти чёрный, глубина */
+              rgba(112,184,255,0.35) 20%,
+              rgba(101,168,255,0.7) 80%,
+              rgba(112,184,255,1) 36%,
+              rgba(255,255,255,1) 100%
             )
           `,
-
-          border: "1px solid rgba(112,184,255,1)", // тонкий контур по краю
+          border: "1px solid rgba(112,184,255,1)",
+          boxShadow: `0 0 120px rgba(80,170,255,0.15)`,
+          transition: "all 0.3s ease-in-out",
         }}
       >
-
-        {/* === ТЕКСТ ВНУТРИ КРУГА === */}
-        <div className="relative z-20 text-center select-none" style={{ pointerEvents: "auto" }}>
+        {/* === ТЕКСТ ВНУТРИ === */}
+        <div className="relative z-20 text-center select-none">
           <div
             style={{
               color: "#fff",
-              fontSize: "clamp(28px, 5.6vw, 72px)", // адаптивный размер
+              fontSize: "clamp(28px, 5.6vw, 72px)",
               fontWeight: 800,
-              textShadow: "0 10px 36px rgba(90,170,255,0.3)", // сияние текста
+              textShadow: "0 10px 36px rgba(90,170,255,0.3)",
               lineHeight: 1,
             }}
           >
@@ -182,7 +172,7 @@ export function BreathingCircle({
 
           <div
             style={{
-              color: "rgba(220,235,255,0.95)", // цвет таймера
+              color: "rgba(220,235,255,0.95)",
               marginTop: 8,
               fontSize: "clamp(12px,1.6vw,20px)",
             }}

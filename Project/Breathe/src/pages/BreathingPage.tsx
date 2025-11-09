@@ -1,12 +1,31 @@
 // src/pages/BreathingPage.tsx
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import { BreathingCircle, Phase } from "../components/BreathingCircle";
 import { SettingsModal } from "../components/SettingsModal";
 import { VideoBackground } from "../components/VideoBackground";
-import api from '../api';
-import { toast } from 'sonner';
-import { useRef, useEffect } from 'react';
+import api from "../api";
+import { toast } from "sonner";
+import Footer from "../components/Footer";
+import { SessionStats } from "../components/SessionStats"; // 👈 assuming path
+import { SessionFeedbackModal } from "../components/SessionFeedbackModal"; // 👈 New import
+
+interface Session {
+  _id: string;
+  sessionDate: string;
+  moodBefore: number;
+  moodAfter: number;
+  focusLevel: number;
+  stressLevel: number;
+  breathingDepth: number;
+  calmnessScore: number;
+  distractionCount: number;
+  timeOfDay: string;
+  noiseLevel: string;
+  sessionLength: number;
+  cycles: number;
+  notes?: string;
+}
 
 export default function BreathingPage() {
   const [isActive, setIsActive] = useState(false);
@@ -14,11 +33,20 @@ export default function BreathingPage() {
   const [videoOpacity, setVideoOpacity] = useState(0.55);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cycles, setCycles] = useState(0);
-  const [videoSpeed] = useState(1); // base playbackRate is 1; we let VideoBackground tweak up to maxSpeed
+  const [videoSpeed] = useState(1);
   const [videoBrightness, setVideoBrightness] = useState(1.05);
   const [pauseBetween, setPauseBetween] = useState(1.8);
   const startTimeRef = useRef<number | null>(null);
   const wasActiveRef = useRef(isActive);
+  const [currentDuration, setCurrentDuration] = useState(0);
+  const [totalStats, setTotalStats] = useState({
+    totalSessions: 0,
+    totalMinutes: 0,
+    streak: 0,
+  });
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [pendingPayload, setPendingPayload] = useState<any | null>(null);
+  const savedClientIdsRef = useRef(new Set<string>());
 
   const videos = [
     "/videos/med-01.mp4",
@@ -30,82 +58,194 @@ export default function BreathingPage() {
     "/videos/med-07.mp4",
   ];
 
-  // visual intensity (for brightness/opacity) optionally driven by BreathingCircle earlier (not required here)
   const [visualIntensity, setVisualIntensity] = useState(0.6);
   const [phase, setPhase] = useState<Phase | null>(null);
 
   const handlePhaseChange = useCallback((p: Phase, intensity: number) => {
-    // remember current phase for VideoBackground
     setPhase(p);
-    // smooth intensity
     setVisualIntensity(prev => prev * 0.7 + intensity * 0.3);
   }, []);
 
-  // compute desired play seconds: half of full cycle (as you wanted)
   const desiredPlaySeconds = useMemo(() => {
     const total = phaseDurations.inhale + phaseDurations.hold + phaseDurations.exhale + phaseDurations.pause;
     return total / 2;
   }, [phaseDurations]);
 
-  // choose circle size relative to viewport
-  const circleSize = useMemo(() => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    return Math.round(Math.min(w, h) * 0.62);
+  const [circleSize, setCircleSize] = useState(() => {
+  const w = window.innerWidth, h = window.innerHeight;
+      return Math.round(Math.min(w,h) * 0.5); // 👈 Здесь задаётся изначальный размер (изменил с 0.62 на 0.5 для уменьшения)
+    });
+
+    useEffect(()=>{
+      const onResize = () => {
+        const w = window.innerWidth, h = window.innerHeight;
+        setCircleSize(Math.round(Math.min(w,h) * 0.5)); // 👈 И здесь на ресайзе (тоже изменил на 0.5)
+      };
+      window.addEventListener('resize', onResize);
+      return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+
+  const calculateStreak = (sessions: Session[]) => {
+    if (sessions.length === 0) return 0;
+
+    const todayStr = new Date().toDateString();
+    const hasToday = sessions.some(s => new Date(s.sessionDate).toDateString() === todayStr);
+    if (!hasToday) return 0;
+
+    const uniqueDates = [...new Set(sessions.map(s => new Date(s.sessionDate).toDateString()))].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+    let streak = 1; // today
+    let current = new Date();
+    current.setDate(current.getDate() - 1);
+
+    while (true) {
+      const nextDateStr = current.toDateString();
+      if (uniqueDates.includes(nextDateStr)) {
+        streak++;
+        current.setDate(current.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  };
+
+  const fetchTotalStats = async () => {
+    try {
+      const res = await api.get("/sessions");
+      const sessions: Session[] = res.data;
+      const totalSessions = sessions.length;
+      const totalMinutes = sessions.reduce((sum, s) => sum + s.sessionLength, 0);
+      const streak = calculateStreak(sessions);
+      setTotalStats({ totalSessions, totalMinutes: Math.round(totalMinutes), streak });
+    } catch (err) {
+      console.error("Failed to fetch stats:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTotalStats();
   }, []);
 
-  // при старте сессии запомним время
-useEffect(() => {
-  if (isActive) {
-    startTimeRef.current = Date.now();
-  } else {
-    // если раньше был активен, а сейчас stop — сохранить сессию
-    if (wasActiveRef.current && startTimeRef.current) {
-      const now = Date.now();
-      const durationMs = now - startTimeRef.current;
-      // сохраняем в минутах с одной десятой точностью
-      const sessionLength = Math.round((durationMs / 60000) * 10) / 10 || 0.1;
-      const payload = {
-        sessionDate: new Date().toISOString(),
-        moodBefore: 5,         // дефолт, т.к. UI не собирает
-        moodAfter: 5,          // можно заменить реальными значениями если соберёшь
-        focusLevel: 5,
-        stressLevel: 5,
-        breathingDepth: 5,
-        calmnessScore: 5,
-        distractionCount: 0,
-        timeOfDay: (new Date()).toLocaleTimeString([], { hour12: false }), // или 'Morning'
-        noiseLevel: 'Quiet',
-        sessionLength,         // минуты (float)
-        cycles,                // из состояния cycles
-        notes: ''
-      };
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
 
-      (async () => {
-        try {
-          await api.post('/sessions', payload);
-          toast.success('Session saved');
-          // можно обновить локальный стейт/статистику тут если нужно
-        } catch (err:any) {
-          console.error('Failed saving session:', err?.response?.data || err);
-          toast.error('Failed to save session');
+    if (isActive) {
+      if (startTimeRef.current === null) {
+        startTimeRef.current = Date.now();
+      }
+      interval = setInterval(() => {
+        if (startTimeRef.current) {
+          setCurrentDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
         }
-      })();
+      }, 1000);
     }
-    startTimeRef.current = null;
-  }
-  wasActiveRef.current = isActive;
-}, [isActive, cycles]); // запускается при смене isActive
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive]);
+
+    const saveSession = async (payload: any) => {
+      try {
+        // если payload содержит clientId — защитимся от дублей
+        const clientId = payload?.clientId;
+        if (clientId && savedClientIdsRef.current.has(clientId)) {
+          console.info('saveSession: already saved (clientId)', clientId);
+          return; // игнорируем дубль
+        }
+
+        // пометка «в процессе» — добавим в set заранее, чтобы избежать повторных параллельных отправок
+        if (clientId) savedClientIdsRef.current.add(clientId);
+
+        await api.post("/sessions", payload);
+        toast.success("Session saved");
+
+        // post-success: ensure clientId left in set to prevent future duplicates
+        if (clientId) savedClientIdsRef.current.add(clientId);
+
+        setCycles(0);
+        setCurrentDuration(0);
+        fetchTotalStats();
+      } catch (err: any) {
+        // в случае ошибки — убираем clientId из set, чтобы можно было повторить попытку
+        const clientId = payload?.clientId;
+        if (clientId) savedClientIdsRef.current.delete(clientId);
+        console.error("Failed saving session:", err?.response?.data || err);
+        toast.error("Failed to save session");
+      }
+    };
+
+
+    const handleFeedbackSubmit = async (feedback: any) => {
+      if (!pendingPayload) return;
+      const updatedPayload = { ...pendingPayload, ...feedback, feedbackSubmitted: true };
+
+      // await, чтобы не было гонки с onClose
+      await saveSession(updatedPayload);
+
+      // clear pending only after save (или по ошибке — saveSession сам удалит clientId)
+      setPendingPayload(null);
+      setFeedbackOpen(false);
+    };
+
+
+  useEffect(() => {
+    if (isActive) {
+      startTimeRef.current = Date.now();
+    } else {
+      if (wasActiveRef.current && startTimeRef.current) {
+        const now = Date.now();
+        const durationMs = now - startTimeRef.current;
+        const sessionLength = Math.round((durationMs / 60000) * 10) / 10 || 0.1;
+
+        const payload = {
+          sessionDate: new Date().toISOString(),
+          moodBefore: 5,
+          moodAfter: 5,
+          focusLevel: 5,
+          stressLevel: 5,
+          breathingDepth: 5,
+          calmnessScore: 5,
+          distractionCount: 0,
+          timeOfDay: new Date().toLocaleTimeString([], { hour12: false }),
+          noiseLevel: "Quiet",
+          sessionLength,
+          cycles,
+          notes: "",
+        };
+
+        if (sessionLength >= 0.5) {
+          const clientId = `c_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+          setPendingPayload({ ...payload, clientId, feedbackSubmitted: false });
+          // ensure saved flag for this id is false (in case)
+          savedClientIdsRef.current.delete(clientId);
+          setFeedbackOpen(true);
+        } else {
+          // add a clientId for consistency
+          const clientId = `c_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+          saveSession({ ...payload, clientId, feedbackSubmitted: true });
+        }
+
+
+      }
+      startTimeRef.current = null;
+    }
+    wasActiveRef.current = isActive;
+  }, [isActive]); // 👈 removed cycles from dependencies to fix reset bug
 
   return (
-    <div className="relative min-h-screen">
-      {/* Background Image with Overlay */}
-      <div 
+    <div className="relative h-screen overflow-hidden"> {/* 👈 Добавил h-screen overflow-hidden чтобы отключить скролл */}
+      {/* Background */}
+      <div
         className="absolute inset-0 w-full h-full bg-cover bg-center"
         style={{
-          backgroundImage: `url('/public/Background_img_Meditation.jpg')`
+          backgroundImage: `url('/public/Background_img_Meditation.jpg')`,
         }}
       />
+
       <VideoBackground
         videoFiles={videos}
         isActive={isActive}
@@ -122,25 +262,46 @@ useEffect(() => {
 
       <NavBar />
 
-      <div className="relative z-10 min-h-screen w-full flex items-center justify-center">
-        <BreathingCircle
-          isActive={isActive}
-          phaseDurations={phaseDurations}
-          onCycleComplete={() => setCycles((c) => c + 1)}
-          onPhaseChange={handlePhaseChange}
-          size={circleSize}
-          glowIntensity={1.0}
-        />
+      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"> {/* 👈 Изменил на absolute inset-0 чтобы шар был fixed в центре, не двигался при скролле (но скролл отключен) */}
+        <div className="pointer-events-auto"> {/* 👈 Чтобы клики на шар проходили */}
+          <BreathingCircle
+            isActive={isActive}
+            phaseDurations={phaseDurations}
+            onCycleComplete={() => setCycles(c => c + 1)}
+            onPhaseChange={handlePhaseChange}
+            onToggle={() => setIsActive(a => !a)}
+            size={circleSize}
+            glowIntensity={1.0}
+          />
+        </div>
       </div>
 
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3" style={{ pointerEvents: "auto" }}>
-        <button onClick={() => setIsActive(a => !a)} className="px-5 py-2.5 rounded-full bg-[#2e6fbf] text-white shadow-lg hover:shadow-xl transition-shadow">
+      {/* Control Buttons */}
+      <div
+        className="fixed bottom-20 right-6 z-40 flex flex-col items-end gap-3"
+        style={{ pointerEvents: "auto" }}
+      >
+        <button
+          onClick={() => setIsActive(a => !a)}
+          className="px-5 py-2.5 rounded-full bg-[#2e6fbf] text-white shadow-lg hover:shadow-xl transition-shadow"
+        >
           {isActive ? "Pause" : "Start"}
         </button>
 
-        <button onClick={() => setSettingsOpen(true)} className="p-3 rounded-full bg-[#0F2A45] border border-[#23364a] text-[#AEE6FF] shadow-md hover:shadow-lg transition-shadow">
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="p-3 rounded-full bg-[#0F2A45] border border-[#23364a] text-[#AEE6FF] shadow-md hover:shadow-lg transition-shadow"
+        >
           ⚙
         </button>
+      </div>
+
+      {/* Session Stats */}
+      <div className="fixed bottom-20 left-6 z-40">
+        <SessionStats
+          currentSession={{ duration: currentDuration, cycles }}
+          totalStats={totalStats}
+        />
       </div>
 
       <SettingsModal
@@ -153,6 +314,40 @@ useEffect(() => {
         videoSpeed={videoSpeed}
         onVideoSpeedChange={() => {}}
       />
+
+        <SessionFeedbackModal
+        open={feedbackOpen}
+        onClose={async () => {
+          setFeedbackOpen(false);
+          if (pendingPayload) {
+            const cid = pendingPayload.clientId;
+            // если ещё не сохранён — сохраняем (пользователь пропустил)
+            if (cid && !savedClientIdsRef.current.has(cid)) {
+              // отметим, чтобы избежать дублирования параллельно
+              savedClientIdsRef.current.add(cid);
+              await saveSession({ ...pendingPayload, feedbackSubmitted: false });
+            }
+            setPendingPayload(null);
+          }
+        }}
+        initialData={{
+          moodBefore: 5,
+          moodAfter: 5,
+          focusLevel: 5,
+          stressLevel: 5,
+          breathingDepth: 5,
+          calmnessScore: 5,
+          distractionCount: 0,
+          noiseLevel: "Quiet",
+          notes: "",
+        }}
+        onSubmit={handleFeedbackSubmit}
+      />
+
+      {/* Footer */}
+      <div className="absolute bottom-0 left-0 right-0 z-20"> {/* 👈 Изменил на fixed bottom-0 чтобы футер был внизу, не уезжал */}
+        <Footer />
+      </div>
     </div>
   );
 }

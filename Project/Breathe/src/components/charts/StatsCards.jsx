@@ -23,21 +23,23 @@ const parseDateFromSession = (s) => {
   return d;
 };
 
+// Замени эти два блока в твоём файле
+
+// 1. parseMinutesFromSession — теперь 100% корректно
 const parseMinutesFromSession = (s) => {
   let v = s.sessionLength ?? s.length ?? s.duration ?? s.time ?? s.minutes ?? 0;
 
-  // если значение в секундах (например 0 < v < 1 минута), переводим в минуты
-  if (v > 0 && v < 1) v = v * 60; // или можешь убрать, если данные уже в минутах
+  // Если в секундах (больше 720 — это больше 12 часов, вряд ли)
+  if (v > 720) v = v / 60;
+  // Если в миллисекундах
+  if (v > 1000000) v = v / 60000;
+  // Если дробные минуты (0.2, 5.3 и т.д.) — оставляем как есть
 
-  // большие значения → секунды или миллисекунды
-  if (v > 720) v = v / 60;       // секунды → минуты
-  if (v > 1000000) v = v / 60000; // миллисекунды → минуты
-
-  // округляем до двух знаков после запятой
-  const minutes = Math.round(v * 100) / 100;
-
-  return minutes;
+  // Округляем только для отображения, но НЕ для суммирования
+  return Number(v.toFixed(2)); // например 5.30, 0.20
 };
+
+
 
 
 
@@ -120,125 +122,249 @@ const dayMap = useMemo(() => {
   const miniSessionsData = useMemo(() => last7Data.map(d => ({ name:d.key, value: d.sessions })), [last7Data]);
   const miniConsistencyData = useMemo(() => last7Data.map(d => ({ name:d.key, value: d.sessions>0 ? 1 : 0 })), [last7Data]);
 
-  const bestWeekday = useMemo(() => {
-    const totals = Array(7).fill(0); const counts = Array(7).fill(0);
-    last28.forEach(d => { const wd = d.dateObj.getDay(); totals[wd] += (dayMap[d.key]?.minutes||0); counts[wd]++; });
-    const avgs = totals.map((t,i)=> Math.round(t/Math.max(1,counts[i])));
-    let idx=0; for (let i=1;i<7;i++) if (avgs[i]>avgs[idx]) idx=i;
-    const names = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    return { idx, name: names[idx], avg: avgs[idx], averages: avgs };
-  }, [last28, dayMap]);
+// 2. bestWeekday — теперь точный и красивый
+const bestWeekday = useMemo(() => {
+  const totals = Array(7).fill(0);
+  const counts = Array(7).fill(0);
 
-  const moodTrend = useMemo(() => {
-    const pos = new Set(['happy','excited','joy','good','calm','peaceful','relaxed','great','excellent','wonderful','amazing','joyful']);
-    const neg = new Set(['sad','tired','angry','bad','stressed','anxious','frustrated','overwhelmed']);
-    let p=0, u=0, n=0;
-    last30.forEach(d => {
-      const moods = dayMap[d.key]?.moods || [];
-      moods.forEach(m => { if (pos.has(m)) p++; else if (neg.has(m)) n++; else u++; });
-    });
-    const tot = p + u + n; if (!tot) return { positive:0, neutral:100, negative:0, total:0 };
-    return { positive: Math.round(p/tot*100), neutral: Math.round(u/tot*100), negative: Math.round(n/tot*100), total: tot };
-  }, [last30, dayMap]);
+  // Берём последние 28 дней
+  last28.forEach(d => {
+    const wd = d.dateObj.getDay(); // 0 = Sun, 6 = Sat
+    const minutes = dayMap[d.key]?.minutes || 0;
+    totals[wd] += minutes;
+    if (minutes > 0) counts[wd]++;
+  });
+
+  // Считаем среднее с одним знаком после запятой
+  const avgs = totals.map((total, i) => {
+    const avg = counts[i] > 0 ? total / counts[i] : 0;
+    return Number(avg.toFixed(1)); // 5.3, 12.0, 0.0
+  });
+
+  // Находим лучший день
+  let bestIdx = 0;
+  for (let i = 1; i < 7; i++) {
+    if (avgs[i] > avgs[bestIdx]) bestIdx = i;
+  }
+
+  const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  return {
+    idx: bestIdx,
+    name: names[bestIdx],
+    avg: avgs[bestIdx], // уже с .toFixed(1)
+    averages: avgs,
+  };
+}, [last28, dayMap]);
+
+const moodStats = useMemo(() => {
+  const stats = {
+    positive: { count: 0, percentage: 0 },
+    neutral: { count: 0, percentage: 0 },
+    negative: { count: 0, percentage: 0 },
+    total: 0,
+  };
+
+  const moodValues = sessions
+    .map(s => s.moodAfter ?? s.mood ?? s.moodBefore ?? null)
+    .filter(m => m !== null && m >= 1 && m <= 10);
+
+  stats.total = moodValues.length;
+
+  moodValues.forEach(mood => {
+    if (mood >= 8) stats.positive.count++;
+    else if (mood >= 4) stats.neutral.count++;
+    else stats.negative.count++;
+  });
+
+  if (stats.total > 0) {
+    stats.positive.percentage = Math.round((stats.positive.count / stats.total) * 100);
+    stats.neutral.percentage = Math.round((stats.neutral.count / stats.total) * 100);
+    stats.negative.percentage = Math.round((stats.negative.count / stats.total) * 100);
+  }
+
+  return stats;
+}, [sessions]);
 
   return (
     <div className="w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* ... остальная часть компонента без изменений (тот же JSX что у тебя был) */}
-        {/* Avg session time */}
-        <StatCard
-          value={loading ? '—' : formatDuration(avgSessionLast7)}
-          subValue={
-            <span className={avgPct>0? 'text-emerald-600':'text-rose-600'}>
-              {(avgPct>0? '+':'') + Math.round(avgPct) + '%'} vs prev 7d
-            </span>
-          }
-          label="Avg session (last 7 days)"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={miniAvgData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-              <Line type="monotone" dataKey="value" stroke={Chart3Colors.primary || '#3A82F7'} strokeWidth={3} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </StatCard>
-
-        {/* Total sessions */}
+        {/* Total sessions — ЯРКО-ЗЕЛЁНЫЙ С СВЕЧЕНИЕМ */}
         <StatCard
           value={loading ? '—' : String(totalSessionsLast7)}
           subValue={
-            <span className={sessionsPct>0? 'text-emerald-600':'text-rose-600'}>
-              {(sessionsPct>0? '+':'') + Math.round(sessionsPct) + '%'} vs prev 7d
+            <span className={sessionsPct > 0 ? 'text-emerald-400' : 'text-rose-400'}>
+              {(sessionsPct > 0 ? '+' : '') + Math.round(sessionsPct) + '%'} vs prev 7d
             </span>
           }
           label="Total sessions (last 7 days)"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={miniSessionsData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-              <Line type="monotone" dataKey="value" stroke={Chart3Colors.hover || '#04CE00'} strokeWidth={3} dot={false} />
+            <LineChart data={miniSessionsData} margin={{ top: 15, right: 15, left: 15, bottom: 15 }}>
+              <Line 
+                type="monotone" 
+                dataKey="value" 
+                stroke={Chart3Colors.hover} 
+                strokeWidth={5}
+                dot={false}
+                strokeLinecap="round"
+                style={{ 
+                  filter: 'drop-shadow(0 0 10px rgba(0, 255, 136, 0.8))',
+                  animation: 'dash 2s linear infinite'
+                }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </StatCard>
 
-        {/* Consistency */}
+        {/* Consistency — ЯРКО-СИНИЙ С ТОЧКАМИ */}
         <StatCard
-          value={loading ? '—' : `${Math.round((last7Data.filter(d=>d.sessions>0).length/Math.max(1,last7Data.length))*100)}%`}
+          value={loading ? '—' : `${Math.round((last7Data.filter(d => d.sessions > 0).length / 7) * 100)}%`}
           label="Consistency (days with a session, 7d)"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={miniConsistencyData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-              <Line type="step" dataKey="value" stroke={Chart3Colors.secondary || '#2D5BFF'} strokeWidth={2} dot={{ r:2 }} isAnimationActive={false} />
+            <LineChart data={miniConsistencyData} margin={{ top: 15, right: 15, left: 15, bottom: 15 }}>
+              <Line 
+                type="stepAfter" 
+                dataKey="value" 
+                stroke={Chart3Colors.consistency}
+                strokeWidth={5}
+                dot={{ fill: Chart3Colors.consistency, r: 6 }}
+                activeDot={{ r: 8 }}
+                style={{ filter: 'drop-shadow(0 0 10px rgba(90, 143, 255, 0.9))' }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </StatCard>
 
-        {/* Best day */}
+        {/* Avg session — СИНИЙ ГРАДИЕНТ */}
+        <StatCard
+          value={loading ? '—' : formatDuration(avgSessionLast7)}
+          subValue={
+            <span className={avgPct > 0 ? 'text-emerald-400' : 'text-rose-400'}>
+              {(avgPct > 0 ? '+' : '') + Math.round(avgPct) + '%'} vs prev 7d
+            </span>
+          }
+          label="Avg session (last 7 days)"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={miniAvgData} margin={{ top: 15, right: 15, left: 15, bottom: 15 }}>
+              <Line 
+                type="monotone" 
+                dataKey="value" 
+                stroke={Chart3Colors.primary}
+                strokeWidth={5}
+                dot={false}
+                style={{ filter: 'drop-shadow(0 0 8px rgba(58, 130, 247, 0.7))' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </StatCard>
+
+        {/* Best day — ИДЕАЛЬНЫЙ ВАРИАНТ */}
         <StatCard
           value={loading ? '—' : bestWeekday.name}
           label={`Best day • ${bestWeekday.avg} min avg (4 wks)`}
         >
-          <div className="h-full flex flex-col justify-center gap-2">
+          <div className="h-full flex flex-col justify-center gap-1.5 text-xs">
             {bestWeekday.averages.map((avg, i) => {
-              const maxA = Math.max(...bestWeekday.averages, 1);
-              const pct = Math.min(1, avg / maxA);
+              const maxA = Math.max(...bestWeekday.averages, 0.1);
+              const pct = avg / maxA;
+
               return (
                 <div key={i} className="flex items-center gap-2">
-                  <div className="w-8 text-[11px] text-slate-500">{weekdayShort[i]}</div>
-                  <div className="flex-1 h-2 rounded bg-slate-800/40 overflow-hidden">
-                    <div className="h-full" style={{ width: `${pct*100}%`, background: Chart3Colors.primary || '#3A82F7' }} />
+                  <div className="w-7 text-[10px] font-medium text-slate-400">
+                    {weekdayShort[i]}
                   </div>
-                  <div className="w-9 text-right text-[11px] text-slate-500">{avg}m</div>
+                  
+                  <div className="flex-1 h-2.5 rounded-full bg-slate-800/50 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500 ease-out"
+                      style={{
+                        width: `${Math.min(pct * 100, 100)}%`,
+                        background: i === bestWeekday.idx
+                          ? 'linear-gradient(90deg, #3A82F7, #70B8FF)'
+                          : 'rgba(255,255,255,0.25)',
+                        boxShadow: i === bestWeekday.idx
+                          ? '0 0 8px rgba(58, 130, 247, 0.6)'
+                          : 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div className="w-10 text-right text-[10px] font-medium text-slate-400">
+                    {avg === 0 ? '—' : `${avg}m`}
+                  </div>
                 </div>
               );
             })}
           </div>
         </StatCard>
 
-        {/* Mood trend */}
+        {/* Mood Breakdown — НОВАЯ КРАСИВАЯ КАРТОЧКА */}
         <StatCard
-          value={loading ? '—' : (moodTrend.total ? `${moodTrend.positive}%` : '—')}
-          label="Positive / Neutral / Negative (30d)"
+          value={loading ? '—' : moodStats.total > 0 ? `${moodStats.positive.percentage}%` : '—'}
+          label="Mood Breakdown (All time)"
         >
-          <div className="h-full flex flex-col justify-center gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#04CE00' }} />
-              <div className="flex-1 h-2.5 rounded bg-slate-800/40 overflow-hidden">
-                <div className="h-full" style={{ width: `${moodTrend.positive}%`, background: '#04CE00' }} />
+          <div className="h-full flex flex-col justify-center gap-3">
+            {/* Positive */}
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-sm" style={{ background: '#04CE00' }} />
+              <div className="flex-1 h-3 rounded-full bg-slate-800/50 overflow-hidden">
+                <div 
+                  className="h-full transition-all duration-700 ease-out"
+                  style={{ 
+                    width: `${moodStats.positive.percentage}%`, 
+                    background: 'linear-gradient(90deg, #04CE00, #00FFA3)' 
+                  }} 
+                />
               </div>
-              <div className="w-10 text-right text-[11px] text-slate-500">{moodTrend.positive}%</div>
+              <div className="w-16 text-right text-sm font-medium text-[#AEE6FF]">
+                {moodStats.positive.percentage}%
+              </div>
+              <div className="text-xs text-slate-500">({moodStats.positive.count})</div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#7A8194' }} />
-              <div className="flex-1 h-2.5 rounded bg-slate-800/40 overflow-hidden">
-                <div className="h-full" style={{ width: `${moodTrend.neutral}%`, background: '#7A8194' }} />
+
+            {/* Neutral */}
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-sm" style={{ background: '#7A8194' }} />
+              <div className="flex-1 h-3 rounded-full bg-slate-800/50 overflow-hidden">
+                <div 
+                  className="h-full transition-all duration-700 ease-out"
+                  style={{ 
+                    width: `${moodStats.neutral.percentage}%`, 
+                    background: 'linear-gradient(90deg, #7A8194, #B0B7C9)' 
+                  }} 
+                />
               </div>
-              <div className="w-10 text-right text-[11px] text-slate-500">{moodTrend.neutral}%</div>
+              <div className="w-16 text-right text-sm font-medium text-[#AEE6FF]">
+                {moodStats.neutral.percentage}%
+              </div>
+              <div className="text-xs text-slate-500">({moodStats.neutral.count})</div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#FF4D4F' }} />
-              <div className="flex-1 h-2.5 rounded bg-slate-800/40 overflow-hidden">
-                <div className="h-full" style={{ width: `${moodTrend.negative}%`, background: '#FF4D4F' }} />
+
+            {/* Negative */}
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-sm" style={{ background: '#FF4D4F' }} />
+              <div className="flex-1 h-3 rounded-full bg-slate-800/50 overflow-hidden">
+                <div 
+                  className="h-full transition-all duration-700 ease-out"
+                  style={{ 
+                    width: `${moodStats.negative.percentage}%`, 
+                    background: 'linear-gradient(90deg, #FF4D4F, #FF8A8A)' 
+                  }} 
+                />
               </div>
-              <div className="w-10 text-right text-[11px] text-slate-500">{moodTrend.negative}%</div>
+              <div className="w-16 text-right text-sm font-medium text-[#AEE6FF]">
+                {moodStats.negative.percentage}%
+              </div>
+              <div className="text-xs text-slate-500">({moodStats.negative.count})</div>
+            </div>
+
+            {/* Total */}
+            <div className="mt-2 pt-2 border-t border-slate-700 flex justify-between text-xs">
+              <span className="text-slate-400">Total entries</span>
+              <span className="font-medium text-[#70B8FF]">{moodStats.total}</span>
             </div>
           </div>
         </StatCard>

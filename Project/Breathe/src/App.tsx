@@ -1,13 +1,12 @@
 // App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/HomePage.tsx';
 import BreathingPage from './pages/BreathingPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import StatsPage from './pages/StatsPage';
 import SessionsPage from './pages/SessionPage';
 import NewSessionPage from './pages/NewSessionPage';
-import StatisticsPreview from './pages/StatisticsPreview';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 import './index.css';
@@ -36,7 +35,6 @@ export default function App() {
                     <StatsPage />
                 </ProtectedRoute>
                 } />
-                <Route path="/statistics-preview" element={<StatisticsPreview />} />
                 <Route path="/faq" element={<div>FAQ Page</div>} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />

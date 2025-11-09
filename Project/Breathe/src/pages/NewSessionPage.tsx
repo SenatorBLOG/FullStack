@@ -1,13 +1,15 @@
+// src/pages/NewSessionPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../components/NavBar';
-import api from '../api';
-import { toast } from 'sonner';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Slider } from '../components/ui/slider';
+import NavBar from "../components/NavBar";
+import api from "../api";
+import { toast } from "sonner";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Slider } from "../components/ui/slider";
+import Footer from "../components/Footer";
 
 export default function NewSessionPage() {
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export default function NewSessionPage() {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-[#0A0F1F]">
+    <div className="relative min-h-screen bg-[#0A0F1F]">
       {/* Navigation Bar */}
       <div className="relative z-10">
         <NavBar />
@@ -77,7 +79,7 @@ export default function NewSessionPage() {
             {/* Time of Day */}
             <div>
               <Label className="text-[#70B8FF] text-[18px] font-roboto mb-2 block">Time of Day</Label>
-              <Select value={formData.timeOfDay} onValueChange={([value]: string) => setFormData({ ...formData, timeOfDay: value })}>
+              <Select value={formData.timeOfDay} onValueChange={(value: string) => setFormData({ ...formData, timeOfDay: value })}>
                 <SelectTrigger className="bg-[rgba(255,255,255,0.04)] border border-[#C1BBBB] text-[#3A82F7] text-[18px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -258,20 +260,25 @@ export default function NewSessionPage() {
             <div className="flex gap-4 pt-4">
               <button 
                 type="submit"
-                className="px-12 py-4 bg-[#3A82F7] shadow-[0_4px_3px_0_rgba(0,0,0,0.25)] hover:bg-[#2970E5] transition-colors"
+                className="px-5 py-2.5 rounded-full bg-[#3A82F7] text-white shadow-lg hover:shadow-xl transition-shadow"
               >
                 <span className="text-white text-[18px] font-normal font-roboto">Save Session</span>
               </button>
               <button 
                 type="button"
                 onClick={() => navigate('/sessions')}
-                className="px-12 py-4 border border-[#3A82F7] hover:bg-[#3A82F7] transition-colors group"
+                className="px-5 py-2.5 rounded-full border border-[#3A82F7] text-[#3A82F7] shadow-lg hover:shadow-xl hover:bg-[#3A82F7] hover:text-white transition-all"
               >
-                <span className="text-[#3A82F7] text-[18px] font-normal font-roboto group-hover:text-white">Cancel</span>
+                <span className="text-[18px] font-normal font-roboto">Cancel</span>
               </button>
             </div>
           </div>
         </form>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-[999]">
+        <Footer />
       </div>
     </div>
   );

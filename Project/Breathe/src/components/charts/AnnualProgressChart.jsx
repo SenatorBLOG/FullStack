@@ -1,3 +1,4 @@
+// AnnualProgressChart.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   ComposedChart,
@@ -7,34 +8,30 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Cell
+  LabelList,
+  CartesianGrid
 } from 'recharts';
 import { Chart3BlueContainer, Chart3Colors, Chart3Dropdown } from './Chart3StyleComponents';
 import api from '../../api';
+import { Bot } from 'lucide-react';
 
-/**
- * AnnualProgressChart
- * - default view: "Last 12 months"
- * - alternative view: "Yearly summary"
- * - optional prop currentSession = { time, cycles, startedAt } для отображения live-индикации
- */
 const AnnualProgressChart = ({ currentSession = null }) => {
   const [rawSessions, setRawSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState('Last 12 months'); // default
-  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [view, setView] = useState('Last 12 months');
 
-  useEffect(() => {
-    fetchSessions();
-  }, []);
-  
+  useEffect(() => { fetchSessions(); }, []);
 
   async function fetchSessions() {
     setLoading(true);
     try {
-      const res = await api.get('/sessions'); // ожидаем [{date, time, cycles, ...}]
-      // normalize dates to ISO
-      const sessions = (res.data || []).map(s => ({ ...s, date: new Date(s.date) }));
+      const res = await api.get('/sessions');
+      const sessions = (res.data || []).map(s => ({
+        ...s,
+        dateObj: new Date(s.sessionDate || s.date),
+        minutes: Number(s.sessionLength ?? s.minutes ?? (s.time ? s.time / 60 : 0)) || 0,
+        cycles: Number(s.cycles || 0)
+      }));
       setRawSessions(sessions);
     } catch (err) {
       console.error('Error fetching sessions:', err);
@@ -43,50 +40,46 @@ const AnnualProgressChart = ({ currentSession = null }) => {
     }
   }
 
-  // ---- helpers ----
   const monthsLabels = (d) => {
     const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const year = String(d.getFullYear()).slice(-2);
     return `${M[d.getMonth()]} ${year}`;
   };
 
-  // Build last 12 months array (objects with key 'YYYY-MM')
   const last12Months = useMemo(() => {
     const arr = [];
     const now = new Date();
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}`;
-      arr.push({ dateObj: d, key, label: monthsLabels(d), minutes: 0, sessions: 0, cycles: 0 });
+      arr.push({ dateObj: d, key, label: monthsLabels(d) });
     }
     return arr;
   }, []);
 
-  // aggregate for "Last 12 months"
   const monthlyData = useMemo(() => {
-    if (!rawSessions.length) return last12Months.map(m => ({ name: m.label, totalMinutes: 0, sessions: 0, cycles:0 }));
-    const map = Object.fromEntries(last12Months.map(m => [m.key, { ...m }]));
+    const map = Object.fromEntries(last12Months.map(m => [m.key, { ...m, minutes: 0, sessions: 0, cycles: 0 }]));
+    
     rawSessions.forEach(s => {
-      const d = new Date(s.date);
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      if (map[key]) {
-        map[key].minutes += Math.round((s.time || 0) / 60); // минуты
-        map[key].sessions += 1;
-        map[key].cycles += (s.cycles || 0);
-      }
+      const d = s.dateObj;
+      if (!d || isNaN(d)) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}`;
+      if (!map[key]) return;
+      map[key].minutes += s.minutes;
+      map[key].sessions += 1;
+      map[key].cycles += s.cycles;
     });
-    // convert to stacked segments for visual style
-    return Object.values(map).map((m, idx) => {
-      const total = m.minutes;
-      // split into 4 segments (visual; last segment = remainder)
-      const seg1 = Math.floor(total * 0.25);
-      const seg2 = Math.floor(total * 0.25);
-      const seg3 = Math.floor(total * 0.25);
-      const seg4 = total - seg1 - seg2 - seg3;
+
+    return Object.values(map).map(m => {
+      const total = Math.round(m.minutes * 10) / 10;
+      const seg = total / 4;
+      const seg1 = Math.round(seg * 10) / 10;
+      const seg2 = Math.round(seg * 10) / 10;
+      const seg3 = Math.round(seg * 10) / 10;
+      const seg4 = Math.round((total - seg1 - seg2 - seg3) * 10) / 10;
+
       return {
         name: m.label,
-        year: m.dateObj.getFullYear(),
-        month: m.dateObj.getMonth(),
         totalMinutes: total,
         sessions: m.sessions,
         cycles: m.cycles,
@@ -94,31 +87,29 @@ const AnnualProgressChart = ({ currentSession = null }) => {
         segment2: seg2,
         segment3: seg3,
         segment4: seg4,
-        lineValue: m.sessions // можно заменить на другой показатель
+        lineValue: m.sessions
       };
     });
   }, [rawSessions, last12Months]);
 
-  // aggregate for "Yearly summary" (group all sessions by year)
   const yearlyData = useMemo(() => {
-    if (!rawSessions.length) return [];
     const map = {};
     rawSessions.forEach(s => {
-      const y = new Date(s.date).getFullYear();
+      const y = s.dateObj?.getFullYear() || new Date(s.sessionDate || s.date).getFullYear();
       if (!map[y]) map[y] = { year: y, minutes: 0, sessions: 0, cycles: 0 };
-      map[y].minutes += Math.round((s.time || 0) / 60);
+      map[y].minutes += s.minutes;
       map[y].sessions += 1;
-      map[y].cycles += (s.cycles || 0);
+      map[y].cycles += s.cycles;
     });
-    return Object.values(map).sort((a,b)=>a.year-b.year).map((item, idx) => {
-      const total = item.minutes;
-      const seg1 = Math.floor(total * 0.25);
-      const seg2 = Math.floor(total * 0.25);
-      const seg3 = Math.floor(total * 0.25);
-      const seg4 = total - seg1 - seg2 - seg3;
+    return Object.values(map).sort((a,b) => a.year - b.year).map(item => {
+      const total = Math.round(item.minutes * 10) / 10;
+      const seg = total / 4;
+      const seg1 = Math.round(seg * 10) / 10;
+      const seg2 = Math.round(seg * 10) / 10;
+      const seg3 = Math.round(seg * 10) / 10;
+      const seg4 = Math.round((total - seg1 - seg2 - seg3) * 10) / 10;
       return {
         name: String(item.year),
-        year: item.year,
         totalMinutes: total,
         sessions: item.sessions,
         cycles: item.cycles,
@@ -131,119 +122,112 @@ const AnnualProgressChart = ({ currentSession = null }) => {
     });
   }, [rawSessions]);
 
-  // choose data based on view
   const data = view === 'Yearly summary' ? yearlyData : monthlyData;
-
-  // dynamic Y max
-  const maxRaw = data.length ? Math.max(...data.map(d=>d.totalMinutes || 0)) : 10;
-  const base = Math.max(6, maxRaw);
-  const step = Math.ceil(base / 3) || 1;
+  const maxRaw = data.length ? Math.max(...data.map(d => d.totalMinutes || 0)) : 1;
+  const step = Math.ceil(maxRaw / 3);
   const yMax = step * 3;
 
-  // Tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
     const p = payload[0].payload;
     return (
-      <div style={{
-        background: '#fff', padding: 12, borderRadius: 8, boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
-        color: '#12294E', fontSize: 13
-      }}>
-        <div style={{fontWeight:700}}>{p.name}</div>
-        <div style={{opacity:0.85}}>{p.totalMinutes} min • {p.sessions} sessions</div>
+      <div className="rounded-xl px-5 py-3 shadow-2xl border border-white/20"
+           style={{ background: 'rgba(15, 30, 51, 0.95)', backdropFilter: 'blur(12px)' }}>
+        <div className="font-bold text-[#70B8FF] text-lg">{p.name}</div>
+        <div className="text-[#AEE6FF] text-sm">{p.totalMinutes} min • {p.sessions} sessions</div>
+        <div className="text-[#88AACC] text-xs">{p.cycles} cycles</div>
       </div>
     );
   };
-    const barColors = [
-    Chart3Colors.segment1, 
-    Chart3Colors.segment2, 
-    Chart3Colors.segment3, 
-    Chart3Colors.segment4
-  ];
-  const lineColor = Chart3Colors.linePrimary; // например "#FF718B"
-  const gridColor = Chart3Colors.gridLine || '#E5E5EF';
-  const textColor = Chart3Colors.textSecondary;
 
-  // nice formatting for y-axis ticks
-  const formatTick = val => (val >= 1000 ? `${(val/1000).toFixed(1)}k` : val);
-
-  // render
   return (
-    <Chart3BlueContainer title={ view === 'Yearly summary' ? 'Yearly meditation' : 'Last 12 months' } subtitle="Statistics" width="100%" height="384px">
-      {/* Dropdown Selector */}
-      <div className="absolute right-[65px] top-[38px]">
+    <Chart3BlueContainer 
+      title={view === 'Yearly summary' ? 'Yearly meditation' : 'Last 12 months'} 
+      subtitle="Total time & sessions"
+      width="100%" 
+      height="420px"
+    >
+      {/* ДРОПДАУН  */}
+      <div className="absolute right-8 top-8 z-10">
         <Chart3Dropdown
           value={view}
-          onChange={(v) => setView(v)}
+          onChange={setView}
           options={['Last 12 months', 'Yearly summary']}
-          className="w-[239px] h-[35px] bg-[#F8F8FF]"
         />
       </div>
 
-      {/* Optional live session card (Start Stage) */}
+      {/* Live session */}
       {currentSession && (
-        <div style={{
-          position: 'absolute', left: 142, top: 96, padding: '10px 14px', borderRadius: 12,
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.04)', color: '#fff'
-        }}>
-          <div style={{fontSize:12, opacity:0.9}}>Live session</div>
-          <div style={{fontSize:16, fontWeight:700}}>{Math.floor((currentSession.time||0)/60)}:{String((currentSession.time||0)%60).padStart(2,'0')} min</div>
-          <div style={{fontSize:12, opacity:0.85}}>{currentSession.cycles || 0} cycles</div>
+        <div className="absolute left-8 top-24 px-4 py-3 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+          <div className="text-xs text-[#88AACC]">Live session</div>
+          <div className="text-2xl font-bold text-[#70B8FF]">
+            {Math.floor((currentSession.time||0)/60)}:{String((currentSession.time||0)%60).padStart(2,'0')}
+          </div>
+          <div className="text-xs text-[#AEE6FF]">{currentSession.cycles || 0} cycles</div>
         </div>
       )}
 
-      {/* Chart area */}
-      <div className="absolute left-[45px] top-[150px] w-[900px] h-[210px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{top:0, right:0, left:0, bottom:0}}
-            onMouseMove={(e) => {
-              if (e && typeof e.activeTooltipIndex === 'number') setHoveredIndex(e.activeTooltipIndex);
-            }}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <XAxis dataKey="name" axisLine={false} tickLine={false}
-              tick={{ fontSize: 16, fill: Chart3Colors.textPrimary, fontFamily: 'Montserrat', dy:8, }} interval={0} />
-            <YAxis axisLine={false} tickLine={false} domain={[0, yMax]}
-              tick={{ fontSize: 20, fill: Chart3Colors.textPrimary, fontFamily: 'Montserrat' }}
-              tickFormatter={formatTick} ticks={[0, step, step*2, step*3]} />
-            <Tooltip content={<CustomTooltip />} />
+      <ResponsiveContainer>
+        <ComposedChart data={data} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}barCategoryGap="10%" barGap={-20} >
+          <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="rgba(112, 184, 255, 0.15)" />
+          <XAxis 
+          dataKey="name" 
+          axisLine={false} 
+          tickLine={false}
+          tick={{ fill: '#AEE6FF', fontSize: 13, fontWeight: 500 }}
+          interval={0}
+          padding={{ left: 0, right: 0 }}  // убираем смещение
+          height={50}
+        />
 
-            {/* stacked bars (4 segments) */}
-            <Bar dataKey="segment1" stackId="a" fill={barColors[0]} radius={[0,0,6,6]} />
-            <Bar dataKey="segment2" stackId="a" fill={barColors[1]} />
-            <Bar dataKey="segment3" stackId="a" fill={barColors[2]} />
-            <Bar dataKey="segment4" stackId="a" fill={barColors[3]} radius={[6,6,0,0]} />
+          
+          <YAxis 
+            yAxisId="left" 
+            axisLine={false} 
+            tickLine={false}
+            tick={{ fill: '#88AACC', fontSize: 12 }}
+            domain={[0, yMax]}
+          />
+          
+          <YAxis 
+            yAxisId="right" 
+            orientation="right" 
+            axisLine={false} 
+            tickLine={false}
+            tick={{ fill: '#70B8FF', fontSize: 11 }}
+          />
 
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(112, 184, 255, 0.1)' }} />
 
-            {/* overlay line (sessions count) */}
-            <Line type="monotone" dataKey="lineValue" stroke={Chart3Colors.linePrimary} strokeWidth={2} dot={{ r:4 }} activeDot={{ r:6 }} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+          {/* СЕГМЕНТЫ — ЯРКИЕ ЦВЕТА ИЗ Chart3Colors */}
+          <Bar yAxisId="left" dataKey="segment1" stackId="a" fill="#70B8FF" radius={[0,0,8,8]} />
+          <Bar yAxisId="left" dataKey="segment2" stackId="a" fill="#62AAFB" />
+          <Bar yAxisId="left" dataKey="segment3" stackId="a" fill="#549BF6" />
+          <Bar yAxisId="left" dataKey="segment4" stackId="a" fill="#387DED" radius={[8,8,0,0]} />
 
-      {/* grid lines */}
-      <div className="absolute left-[142px] top-[151px] w-[801px] h-[161px] pointer-events-none">
-        <div style={{position:'absolute', width:'100%', height:0, top:'161px', background:'#E5E5EF'}} />
-        <div style={{position:'absolute', width:'100%', height:0, top:'106px', background:'#E5E5EF'}} />
-        <div style={{position:'absolute', width:'100%', height:0, top:'53px', background:'#E5E5EF'}} />
-        <div style={{position:'absolute', width:'100%', height:0, top:'0px', background:'#E5E5EF'}} />
-      </div>
+          {/* Подпись сверху */}
+          <Bar yAxisId="left" dataKey="totalMinutes" fill="transparent">
+            <LabelList 
+              dataKey="totalMinutes" 
+              position="top-right" 
+              formatter={(v) => v > 0 ? `${v}m` : ''} 
+              style={{ fill: '#AEE6FF', fontSize: 13, fontWeight: 'bold', }}
+            />
+          </Bar>
 
-      {/* divider */}
-      <div className="absolute left-[65px] top-[106px] w-[878px] h-0" style={{ background: '#E5E5EF' }} />
-
-      {/* decorative gradient area under line (optional) */}
-      <div className="absolute left-[115px] top-[156px] w-[1000px] h-[154px] pointer-events-none">
-        <svg width="1100" height="154" viewBox="0 0 1000 154" className="absolute inset-0">
-          <defs>
-            <linearGradient id="areaGradientChart" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={Chart3Colors.primary} stopOpacity="0.6"/>
-              <stop offset="100%" stopColor={Chart3Colors.primary} stopOpacity="0"/>
-            </linearGradient>
-          </defs>
-          <path d="M0 60 C100 70, 200 40, 300 90 C400 120, 500 60, 600 110 C650 120, 700 90, 744 80 L744 154 L0 154 Z" fill="url(#areaGradientChart)" opacity="0.6" />
-        </svg>
-      </div>
+          {/* Линия сессий */}
+          <Line 
+            yAxisId="right" 
+            type="monotone" 
+            dataKey="lineValue" 
+            stroke="#00ff88" 
+            strokeWidth={4}
+            dot={{ fill: '#00ff88', r: 3 }}
+            activeDot={{ r: 8 }}
+            style={{ filter: 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.7))' }}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
     </Chart3BlueContainer>
   );
 };

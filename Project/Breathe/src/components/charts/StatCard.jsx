@@ -14,7 +14,7 @@ const StatCard = ({ value, subValue, label, className = '', children }) => {
       </div>
 
       {children && (
-        <div className="mt-2 h-[90px] sm:h-[110px]">
+        <div className="mt-2 h-[110px] sm:h-[130px]">
           {children}
         </div>
       )}

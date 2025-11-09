@@ -1,9 +1,11 @@
+// src/pages/SessionsPage.tsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import NavBar from '../components/NavBar';
-import api from '../api';
-import { toast } from 'sonner';
+import NavBar from "../components/NavBar";
+import api from "../api";
+import { toast } from "sonner";
 import { Trash2 } from 'lucide-react';
+import Footer from "../components/Footer";
 
 interface Session {
   _id: string;
@@ -63,7 +65,7 @@ export default function SessionsPage() {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-[#0A0F1F]">
+    <div className="relative min-h-screen bg-[#0A0F1F]">
       {/* Navigation Bar */}
       <div className="relative z-10">
         <NavBar />
@@ -78,16 +80,16 @@ export default function SessionsPage() {
           <div className="flex gap-4">
             <Link 
               to="/sessions/new" 
-              className="px-8 py-3 bg-[#3A82F7] shadow-[0_4px_3px_0_rgba(0,0,0,0.25)] hover:bg-[#2970E5] transition-colors"
+              className="px-5 py-2.5 rounded-full bg-[#3A82F7] text-white shadow-lg hover:shadow-xl transition-shadow"
             >
               <span className="text-white text-[18px] font-normal font-roboto">New Session</span>
             </Link>
             {sessions.length > 0 && (
               <button 
                 onClick={handleDeleteAll}
-                className="px-8 py-3 border border-red-500 hover:bg-red-500 transition-colors group"
+                className="px-5 py-2.5 rounded-full border border-red-500 text-red-500 shadow-lg hover:shadow-xl hover:bg-red-500 hover:text-white transition-all"
               >
-                <span className="text-red-500 text-[18px] font-normal font-roboto group-hover:text-white">Delete All</span>
+                <span className="text-[18px] font-normal font-roboto">Delete All</span>
               </button>
             )}
           </div>
@@ -102,7 +104,7 @@ export default function SessionsPage() {
             </p>
             <Link 
               to="/sessions/new" 
-              className="inline-block px-12 py-4 bg-[#3A82F7] shadow-[0_4px_3px_0_rgba(0,0,0,0.25)] hover:bg-[#2970E5] transition-colors"
+              className="inline-block px-5 py-2.5 rounded-full bg-[#3A82F7] text-white shadow-lg hover:shadow-xl transition-shadow"
             >
               <span className="text-white text-[20px] font-normal font-roboto">Start Your First Session</span>
             </Link>
@@ -158,6 +160,11 @@ export default function SessionsPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-[999]">
+        <Footer />
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const location = useLocation();
   if (!isAuthenticated) {
     // перенаправим на страницу превью статистики или на логин
-    return <Navigate to="/statistics-preview" state={{ from: location }} replace />;
+    return <Navigate to="/home-page" state={{ from: location }} replace />;
   }
   return children;
 };

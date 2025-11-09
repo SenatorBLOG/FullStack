@@ -1,4 +1,3 @@
-// src/components/NavBar.tsx
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from './contexts/AuthContext';
@@ -19,9 +18,10 @@ export default function NavBar() {
         <a href="/breathing" onClick={onLogoClick} className="text-[#BCDDFF] text-2xl font-medium">Breathe</a>
         <Link to="/home-page" className="text-[#9CCBFF]">Home</Link>
         <Link to="/music-library" className="text-[#9CCBFF]">Music</Link>
-        <Link to={isAuthenticated ? "/statistics" : "/statistics-preview"} className="text-[#9CCBFF]">
-          Statistics
-        </Link>
+        {isAuthenticated && (<Link to="/sessions" className="text-[#9CCBFF]">Sessions</Link>)
+          
+         }
+        {/* Statistics link intentionally removed per request */}
       </div>
 
       <div className="flex items-center gap-3">
@@ -32,10 +32,24 @@ export default function NavBar() {
           </>
         ) : (
           <>
-            <button onClick={() => navigate('/profile')} className="px-4 py-2 rounded-full bg-white/10 text-white">
+            {/* Profile button now navigates to statistics page */}
+            <button
+              onClick={() => navigate('/statistics')}
+              className="px-4 py-2 rounded-full bg-white/10 text-white"
+              aria-label="Open statistics"
+            >
               {user?.name ? user.name : 'Profile'}
             </button>
-            <button onClick={() => logout()} className="px-4 py-2 rounded-full bg-[#FF6B6B] text-white">Logout</button>
+
+            <button
+              onClick={() => {
+                logout();
+                navigate('/breathing');
+              }}
+              className="px-4 py-2 rounded-full bg-[#FF6B6B] text-white"
+            >
+              Logout
+            </button>
           </>
         )}
       </div>
