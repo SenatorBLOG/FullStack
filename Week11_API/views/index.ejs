@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="main.css">
+  <title>I'm Bored</title>
+</head>
+
+<body>
+  <div>
+    <h1>Here is a random fact about the cats....</h1>
+    <section id="cards">
+
+      <% if(locals.data) {%>
+
+      <h2>
+        <!-- Show Fact -->
+        <%= data.fact %>
+      </h2>
+      <p>
+        <!-- Show Information -->
+        Information: Total number of characters in this sentence is
+        <%= data.length %>
+      </p>
+      <% } %>
+
+      <% if(locals.error){ %>
+      <div id="tag-error">
+        <!-- Show any errors that were sent from the backend -->
+        <%= error %>
+      </div>
+      <% } %>
+    </section>
+    <h2>Lets get you some trivia questions. </h2>
+    <h3>Make some selections.</h3>
+    <form action="/" id="form" method="POST">
+      <select name="category">
+        <option value="">Choose a category</option>
+        <option value="18">Computer Science</option>
+        <option value="9">General knowledge</option>
+        <option value="21">Sports</option>
+        <option value="22">Geography</option>
+        <option value="23">History</option>
+        <option value="24">Politics</option>
+        <option value="25">Art</option>
+        <option value="26">Celebrities</option>
+        <option value="27">Animals</option>
+      </select>
+      <select name="difficulty">
+        <option value="">Difficulty Level</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+
+      </select>
+      <button type="submit">Go</button>
+    </form>
+    <section id="cards">
+
+      <% if(locals.data) {console.log(locals.data);%>
+
+      <h2>
+        <!-- Show Question -->
+        <%= data.question %>
+      </h2>
+
+      <p>
+        <!-- Show Difficulty Level -->
+        Difficulty Level: <span><%= data.difficulty %></span>
+      </p>
+      <p>
+
+        <!-- Show Category -->
+        Category: <span><%= data.category %> </span>
+      </p>
+      <p>
+
+        <!--Correct Answer true/false -->
+        Correct Answer: <span><%= data.correct_answer %>
+        </span>
+      </p>
+
+      <% } %>
+
+      <% if(locals.error){ %>
+      <div id="tag-error">
+        <!-- Show any errors that were sent from the backend -->
+        <%= error %>
+      </div>
+      <% } %>
+    </section>
+  </div>
+
+</body>
+
+</html>
