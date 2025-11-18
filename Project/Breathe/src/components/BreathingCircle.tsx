@@ -16,7 +16,7 @@ interface BreathingCircleProps {
   phaseDurations: PhaseDurations;
   onCycleComplete?: () => void;
   onPhaseChange?: (phase: Phase, intensity: number) => void;
-  onToggle?: () => void; // 👈 добавлено
+  onToggle?: () => void; 
   size?: number;
   minScale?: number;
   maxScale?: number;
@@ -67,7 +67,7 @@ export function BreathingCircle({
         transition: { duration: 0.6, ease: "easeOut" },
       });
       setPhase("inhale");
-      setCycleCount(0); // 👈 reset cycle count on pause/stop
+      setCycleCount(0); // reset cycle count on pause/stop
       onPhaseChange?.("inhale", intensityByPhase["inhale"]);
       return;
     }
@@ -128,13 +128,13 @@ export function BreathingCircle({
       className="relative flex items-center justify-center"
       style={{ width: sizePx, height: sizePx }}
     >
-      {/* === КЛИКАБЕЛЬНЫЙ КРУГ === */}
+      {/*  CIRCLE  */}
       <motion.div
         animate={controls}
         initial={{ scale: 1 }}
-        whileHover={{ scale: 1.03, filter: "brightness(1.06)" }} // 💡 hover чуть светлее
+        whileHover={{ scale: 1.03, filter: "brightness(1.06)" }}
         whileTap={{ scale: 0.97, filter: "brightness(1.15)" }}
-        onClick={onToggle} // 👈 клик запускает / останавливает дыхание
+        onClick={onToggle} //  
         style={{
           width: sizePx,
           height: sizePx,
@@ -156,7 +156,7 @@ export function BreathingCircle({
           transition: "all 0.3s ease-in-out",
         }}
       >
-        {/* === ТЕКСТ ВНУТРИ === */}
+        {/*  Text  */}
         <div className="relative z-20 text-center select-none">
           <div
             style={{
@@ -182,7 +182,7 @@ export function BreathingCircle({
         </div>
       </motion.div>
 
-      {/* === СЧЁТЧИК ЦИКЛОВ === */}
+      {/*  Cicle count  */}
       <div
         style={{
           position: "absolute",

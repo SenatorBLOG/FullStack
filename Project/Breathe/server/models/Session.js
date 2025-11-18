@@ -12,7 +12,7 @@ const sessionSchema = new mongoose.Schema({
   distractionCount: { type: Number, default: 0 },
   timeOfDay: { type: String, default: '' },
   noiseLevel: { type: String, default: '' },
-  sessionLength: { type: Number, default: 0 }, // минуты
+  sessionLength: { type: Number, default: 0 }, // minutes
   cycles: { type: Number, default: 0 },
   notes: { type: String, default: '' }
 });

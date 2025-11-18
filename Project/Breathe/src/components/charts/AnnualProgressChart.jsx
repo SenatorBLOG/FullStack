@@ -147,7 +147,7 @@ const AnnualProgressChart = ({ currentSession = null }) => {
       width="100%" 
       height="420px"
     >
-      {/* ДРОПДАУН  */}
+      {/* DROPDOWN  */}
       <div className="absolute right-8 top-8 z-10">
         <Chart3Dropdown
           value={view}
@@ -176,7 +176,7 @@ const AnnualProgressChart = ({ currentSession = null }) => {
           tickLine={false}
           tick={{ fill: '#AEE6FF', fontSize: 13, fontWeight: 500 }}
           interval={0}
-          padding={{ left: 0, right: 0 }}  // убираем смещение
+          padding={{ left: 0, right: 0 }} 
           height={50}
         />
 
@@ -199,13 +199,13 @@ const AnnualProgressChart = ({ currentSession = null }) => {
 
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(112, 184, 255, 0.1)' }} />
 
-          {/* СЕГМЕНТЫ — ЯРКИЕ ЦВЕТА ИЗ Chart3Colors */}
+          {/* Segments — Chart3Colors */}
           <Bar yAxisId="left" dataKey="segment1" stackId="a" fill="#70B8FF" radius={[0,0,8,8]} />
           <Bar yAxisId="left" dataKey="segment2" stackId="a" fill="#62AAFB" />
           <Bar yAxisId="left" dataKey="segment3" stackId="a" fill="#549BF6" />
           <Bar yAxisId="left" dataKey="segment4" stackId="a" fill="#387DED" radius={[8,8,0,0]} />
 
-          {/* Подпись сверху */}
+          {/* Top resource */}
           <Bar yAxisId="left" dataKey="totalMinutes" fill="transparent">
             <LabelList 
               dataKey="totalMinutes" 
@@ -215,7 +215,7 @@ const AnnualProgressChart = ({ currentSession = null }) => {
             />
           </Bar>
 
-          {/* Линия сессий */}
+          {/* line sessions */}
           <Line 
             yAxisId="right" 
             type="monotone" 

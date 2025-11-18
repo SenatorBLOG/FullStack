@@ -31,7 +31,7 @@ export function MusicLibrary() {
   const genres = ["all", "meditation", "ambient", "relaxation", "chillout", "lounge"];
 
   useEffect(() => {
-    // если треки загружены в контекст, синхронизируем локальный filtered список
+    //if tracks are in contecs then sync local filtered list
     setFilteredTracks(tracks);
   }, [tracks]);
 
@@ -57,7 +57,7 @@ export function MusicLibrary() {
   const loadGenre = (genre: string) => {
     setSelectedGenre(genre);
     if (genre !== "all") {
-      loadTracks(genre); // вызывает загрузку в контексте
+      loadTracks(genre); // call download in context
     } else {
       loadTracks("meditation");
     }

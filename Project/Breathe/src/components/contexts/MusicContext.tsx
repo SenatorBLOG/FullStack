@@ -43,7 +43,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const [isMuted, setIsMutedState] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Загрузка треков при монтировании
+  // Download treck for render
   useEffect(() => {
     loadTracks();
   }, []);
@@ -56,7 +56,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       );
 
       if (!response.ok) {
-        throw new Error("Не удалось загрузить треки");
+        throw new Error("Couldn't download tracks");
       }
 
       const data = await response.json();

@@ -31,11 +31,11 @@ export default function SignUpPage() {
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* Фон с градиентом + блюр */}
+      {/* Background with gradient + blur */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0A1F3D] via-[#0F1E33] to-[#1A2F4D] opacity-90" />
       <div className="absolute inset-0 backdrop-blur-3xl" />
       
-      {/* Звёздочки (как в твоём дизайне) */}
+      {/* stars */}
       <div className="absolute inset-0">
         {[...Array(60)].map((_, i) => (
           <div
@@ -58,7 +58,7 @@ export default function SignUpPage() {
         <div className="w-full max-w-5xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             
-            {/* Левая часть — текст */}
+            {/* Left panel - text */}
             <div className="space-y-8">
               <h1 className="text-5xl md:text-6xl font-light leading-tight text-[#70B8FF]">
                 Create an account to track<br />
@@ -70,7 +70,7 @@ export default function SignUpPage() {
               </p>
             </div>
 
-            {/* Правая часть — форма */}
+            {/* Rite side */}
             <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl">
               <form onSubmit={handleSignUp} className="space-y-8">
                 {/* Email */}
@@ -106,7 +106,7 @@ export default function SignUpPage() {
                   </div>
                 )}
 
-                {/* Кнопки */}
+                {/* Buttons */}
                 <div className="flex gap-4">
                   <button
                     type="submit"
@@ -123,7 +123,7 @@ export default function SignUpPage() {
                   </Link>
                 </div>
 
-                {/* Соцсети */}
+                {/* Social */}
                 <div className="text-center">
                   <p className="text-[#88AACC] mb-4">Or sign up with</p>
                   <div className="flex justify-center gap-8">
@@ -143,7 +143,7 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      {/* Футер — как в твоём дизайне */}
+      {/* Footer  */}
       <footer className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/50 to-transparent flex items-center justify-center">
         <p className="text-[#88AACC] text-sm">© 2025 Breathe. All rights reserved.</p>
       </footer>

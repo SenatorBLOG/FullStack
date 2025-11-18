@@ -23,20 +23,16 @@ const parseDateFromSession = (s) => {
   return d;
 };
 
-// Замени эти два блока в твоём файле
 
-// 1. parseMinutesFromSession — теперь 100% корректно
+// 1. parseMinutesFromSession
 const parseMinutesFromSession = (s) => {
   let v = s.sessionLength ?? s.length ?? s.duration ?? s.time ?? s.minutes ?? 0;
 
-  // Если в секундах (больше 720 — это больше 12 часов, вряд ли)
   if (v > 720) v = v / 60;
-  // Если в миллисекундах
-  if (v > 1000000) v = v / 60000;
-  // Если дробные минуты (0.2, 5.3 и т.д.) — оставляем как есть
 
-  // Округляем только для отображения, но НЕ для суммирования
-  return Number(v.toFixed(2)); // например 5.30, 0.20
+  if (v > 1000000) v = v / 60000;
+
+  return Number(v.toFixed(2)); 
 };
 
 
@@ -60,8 +56,8 @@ const StatsCards = () => {
         const res = await api.get('/sessions');
         if (!mounted) return;
         const data = Array.isArray(res.data) ? res.data : [];
-        // quick log so you can see exactly what backend returns
-        console.info('sessions fetched:', data.slice(0,10)); // show first 10
+        //  you can see exactly what backend returns
+        console.info('sessions fetched:', data.slice(0,10)); 
         setSessions(data);
       } catch(e){
         console.error('failed to fetch sessions', e);
@@ -80,8 +76,8 @@ const dayMap = useMemo(() => {
     if (!dObj) return;
     const key = dObj.toISOString().slice(0,10);
     if (!map[key]) map[key] = { minutes:0, sessions:0, moods:[] };
-    const minutes = parseMinutesFromSession(s); // точные минуты
-    map[key].minutes += minutes; // суммируем дробные минуты
+    const minutes = parseMinutesFromSession(s); // minutes int
+    map[key].minutes += minutes; // decimal sum
     map[key].sessions += 1;
     const mood = parseMoodFromSession(s);
     if (mood) map[key].moods.push(String(mood).toLowerCase());
@@ -122,12 +118,12 @@ const dayMap = useMemo(() => {
   const miniSessionsData = useMemo(() => last7Data.map(d => ({ name:d.key, value: d.sessions })), [last7Data]);
   const miniConsistencyData = useMemo(() => last7Data.map(d => ({ name:d.key, value: d.sessions>0 ? 1 : 0 })), [last7Data]);
 
-// 2. bestWeekday — теперь точный и красивый
+// 2. bestWeekday 
 const bestWeekday = useMemo(() => {
   const totals = Array(7).fill(0);
   const counts = Array(7).fill(0);
 
-  // Берём последние 28 дней
+  // last 28 days
   last28.forEach(d => {
     const wd = d.dateObj.getDay(); // 0 = Sun, 6 = Sat
     const minutes = dayMap[d.key]?.minutes || 0;
@@ -135,13 +131,13 @@ const bestWeekday = useMemo(() => {
     if (minutes > 0) counts[wd]++;
   });
 
-  // Считаем среднее с одним знаком после запятой
+  // Average with 1 decimal
   const avgs = totals.map((total, i) => {
     const avg = counts[i] > 0 ? total / counts[i] : 0;
     return Number(avg.toFixed(1)); // 5.3, 12.0, 0.0
   });
 
-  // Находим лучший день
+  // Best day
   let bestIdx = 0;
   for (let i = 1; i < 7; i++) {
     if (avgs[i] > avgs[bestIdx]) bestIdx = i;
@@ -152,7 +148,7 @@ const bestWeekday = useMemo(() => {
   return {
     idx: bestIdx,
     name: names[bestIdx],
-    avg: avgs[bestIdx], // уже с .toFixed(1)
+    avg: avgs[bestIdx], // inthere .toFixed(1)
     averages: avgs,
   };
 }, [last28, dayMap]);
@@ -189,7 +185,7 @@ const moodStats = useMemo(() => {
   return (
     <div className="w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Total sessions — ЯРКО-ЗЕЛЁНЫЙ С СВЕЧЕНИЕМ */}
+        {/* Total sessions*/}
         <StatCard
           value={loading ? '—' : String(totalSessionsLast7)}
           subValue={
@@ -217,7 +213,7 @@ const moodStats = useMemo(() => {
           </ResponsiveContainer>
         </StatCard>
 
-        {/* Consistency — ЯРКО-СИНИЙ С ТОЧКАМИ */}
+        {/* Consistency*/}
         <StatCard
           value={loading ? '—' : `${Math.round((last7Data.filter(d => d.sessions > 0).length / 7) * 100)}%`}
           label="Consistency (days with a session, 7d)"
@@ -237,7 +233,7 @@ const moodStats = useMemo(() => {
           </ResponsiveContainer>
         </StatCard>
 
-        {/* Avg session — СИНИЙ ГРАДИЕНТ */}
+        {/* Avg session */}
         <StatCard
           value={loading ? '—' : formatDuration(avgSessionLast7)}
           subValue={
@@ -261,7 +257,7 @@ const moodStats = useMemo(() => {
           </ResponsiveContainer>
         </StatCard>
 
-        {/* Best day — ИДЕАЛЬНЫЙ ВАРИАНТ */}
+        {/* Best day */}
         <StatCard
           value={loading ? '—' : bestWeekday.name}
           label={`Best day • ${bestWeekday.avg} min avg (4 wks)`}
@@ -301,7 +297,7 @@ const moodStats = useMemo(() => {
           </div>
         </StatCard>
 
-        {/* Mood Breakdown — НОВАЯ КРАСИВАЯ КАРТОЧКА */}
+        {/* Mood Breakdown */}
         <StatCard
           value={loading ? '—' : moodStats.total > 0 ? `${moodStats.positive.percentage}%` : '—'}
           label="Mood Breakdown (All time)"

@@ -12,7 +12,6 @@ interface VideoBackgroundProps {
   muted?: boolean;
   pauseBetweenVideos?: number;
   brightness?: number;
-  // NEW:
   phase?: Phase | null; // current phase from BreathingCircle (we start only on inhale)
   desiredPlaySeconds?: number; // desired play length for video (e.g. half of cycle)
   maxSpeed?: number; // maximum allowed speed-up factor (e.g. 1.2)
@@ -118,11 +117,7 @@ export function VideoBackground({
           videoEl.style.filter = `brightness(${computeBrightness(1)}) saturate(1.05)`;
           videoEl.style.opacity = String(computeOpacity(1));
         });
-
-        // schedule fade-out: we prefer to fade-out when exhale begins,
-        // but if exhale doesn't start, we will fade after desiredPlaySeconds (if provided)
-        // We don't forcibly loop; on 'ended' we mark playingRef=false
-      })();
+       })();
     };
 
     videoEl.addEventListener("loadedmetadata", onMeta);

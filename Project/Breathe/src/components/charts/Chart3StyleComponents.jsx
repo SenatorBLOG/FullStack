@@ -3,23 +3,23 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-// === ЦВЕТОВАЯ ПАЛИТРА — ПОЛНОСТЬЮ ИСПРАВЛЕНА ===
+// === color palette  ===
 export const Chart3Colors = {
-  primary: '#3A82F7',        // Основной синий (активный день)
-  secondary: '#BDDEFF',      // Светло-голубой (неактивные бары)
-  hover: '#00ff88',          // ЯРКО-ЗЕЛЁНЫЙ для Total sessions
-  positive: '#00ff88',       // Зелёный для роста
-  negative: '#FF4D4F',       // Красный для падения
-  consistency: '#5A8FFF',    // Яркий синий для Consistency
-  textPrimary: '#AEE6FF',    // Текст
-  textSecondary: '#88AACC',  // Подзаголовки
+  primary: '#3A82F7',        // main
+  secondary: '#BDDEFF',      
+  hover: '#00ff88',          
+  positive: '#00ff88',       
+  negative: '#FF4D4F',       
+  consistency: '#5A8FFF',    
+  textPrimary: '#AEE6FF',    // text
+  textSecondary: '#88AACC',  // secondary
   background: 'rgba(84, 164, 244, 0.13)',
   containerBg: '#0F1E33',
   gridLine: 'rgba(112, 184, 255, 0.2)',
   shadow: '0 8px 32px rgba(13, 10, 44, 0.2)',
 };
 
-// === КОНТЕЙНЕР ===
+// === container ===
 export const Chart3BlueContainer = ({ children, title, subtitle, className = "", width = "100%", height = "425px" }) => (
   <div className={`relative ${className}`} style={{ width, height }}>
     <div 
@@ -47,7 +47,7 @@ export const Chart3BlueContainer = ({ children, title, subtitle, className = "",
   </div>
 );
 
-// === ТУЛТИП ===
+// === title ===
 export const Chart3Tooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
@@ -60,7 +60,7 @@ export const Chart3Tooltip = ({ active, payload }) => {
   return null;
 };
 
-// === ДРОПДАУН ===
+// === dropdown ===
 export const Chart3Dropdown = ({ value, onChange, options, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);

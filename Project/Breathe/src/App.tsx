@@ -24,7 +24,7 @@ export default function App() {
         <MusicProvider>
             <div className="min-h-screen">
             <Routes>
-                {/* корневой путь — редиректим на /home-page или рендерим HomePage */}
+                {/* Rroot /home-page HomePage */}
                 <Route path="/" element={<Navigate to="/home-page" replace />} />
                 <Route path="/home-page" element={<HomePage />} />
                 <Route path="/breathing" element={<BreathingPage />} />

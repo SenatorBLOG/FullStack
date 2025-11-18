@@ -7,8 +7,8 @@ import { VideoBackground } from "../components/VideoBackground";
 import api from "../api";
 import { toast } from "sonner";
 import Footer from "../components/Footer";
-import { SessionStats } from "../components/SessionStats"; // 👈 assuming path
-import { SessionFeedbackModal } from "../components/SessionFeedbackModal"; // 👈 New import
+import { SessionStats } from "../components/SessionStats"; 
+import { SessionFeedbackModal } from "../components/SessionFeedbackModal"; 
 
 interface Session {
   _id: string;
@@ -73,13 +73,13 @@ export default function BreathingPage() {
 
   const [circleSize, setCircleSize] = useState(() => {
   const w = window.innerWidth, h = window.innerHeight;
-      return Math.round(Math.min(w,h) * 0.5); // 👈 Здесь задаётся изначальный размер (изменил с 0.62 на 0.5 для уменьшения)
+      return Math.round(Math.min(w,h) * 0.5); // size at the begining
     });
 
     useEffect(()=>{
       const onResize = () => {
         const w = window.innerWidth, h = window.innerHeight;
-        setCircleSize(Math.round(Math.min(w,h) * 0.5)); // 👈 И здесь на ресайзе (тоже изменил на 0.5)
+        setCircleSize(Math.round(Math.min(w,h) * 0.5)); // re-size
       };
       window.addEventListener('resize', onResize);
       return () => window.removeEventListener('resize', onResize);
@@ -150,14 +150,14 @@ export default function BreathingPage() {
 
     const saveSession = async (payload: any) => {
       try {
-        // если payload содержит clientId — защитимся от дублей
+        // if  payload contains clientId — dubles protection
         const clientId = payload?.clientId;
         if (clientId && savedClientIdsRef.current.has(clientId)) {
           console.info('saveSession: already saved (clientId)', clientId);
-          return; // игнорируем дубль
+          return; // ignore
         }
 
-        // пометка «в процессе» — добавим в set заранее, чтобы избежать повторных параллельных отправок
+        // in procces
         if (clientId) savedClientIdsRef.current.add(clientId);
 
         await api.post("/sessions", payload);
@@ -170,7 +170,7 @@ export default function BreathingPage() {
         setCurrentDuration(0);
         fetchTotalStats();
       } catch (err: any) {
-        // в случае ошибки — убираем clientId из set, чтобы можно было повторить попытку
+        // in case of error — delete clientId из set, we can fix now
         const clientId = payload?.clientId;
         if (clientId) savedClientIdsRef.current.delete(clientId);
         console.error("Failed saving session:", err?.response?.data || err);
@@ -183,10 +183,9 @@ export default function BreathingPage() {
       if (!pendingPayload) return;
       const updatedPayload = { ...pendingPayload, ...feedback, feedbackSubmitted: true };
 
-      // await, чтобы не было гонки с onClose
       await saveSession(updatedPayload);
 
-      // clear pending only after save (или по ошибке — saveSession сам удалит clientId)
+      // clear pending only after save 
       setPendingPayload(null);
       setFeedbackOpen(false);
     };
@@ -234,10 +233,10 @@ export default function BreathingPage() {
       startTimeRef.current = null;
     }
     wasActiveRef.current = isActive;
-  }, [isActive]); // 👈 removed cycles from dependencies to fix reset bug
+  }, [isActive]); 
 
   return (
-    <div className="relative h-screen overflow-hidden"> {/* 👈 Добавил h-screen overflow-hidden чтобы отключить скролл */}
+    <div className="relative h-screen overflow-hidden"> 
       {/* Background */}
       <div
         className="absolute inset-0 w-full h-full bg-cover bg-center"
@@ -262,8 +261,8 @@ export default function BreathingPage() {
 
       <NavBar />
 
-      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"> {/* 👈 Изменил на absolute inset-0 чтобы шар был fixed в центре, не двигался при скролле (но скролл отключен) */}
-        <div className="pointer-events-auto"> {/* 👈 Чтобы клики на шар проходили */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"> 
+        <div className="pointer-events-auto"> 
           <BreathingCircle
             isActive={isActive}
             phaseDurations={phaseDurations}
@@ -321,9 +320,7 @@ export default function BreathingPage() {
           setFeedbackOpen(false);
           if (pendingPayload) {
             const cid = pendingPayload.clientId;
-            // если ещё не сохранён — сохраняем (пользователь пропустил)
             if (cid && !savedClientIdsRef.current.has(cid)) {
-              // отметим, чтобы избежать дублирования параллельно
               savedClientIdsRef.current.add(cid);
               await saveSession({ ...pendingPayload, feedbackSubmitted: false });
             }
@@ -345,7 +342,7 @@ export default function BreathingPage() {
       />
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 z-20"> {/* 👈 Изменил на fixed bottom-0 чтобы футер был внизу, не уезжал */}
+      <div className="absolute bottom-0 left-0 right-0 z-20"> 
         <Footer />
       </div>
     </div>

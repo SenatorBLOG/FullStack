@@ -5,7 +5,11 @@
 
   Run `npm i` to install the dependencies.
 
+  Run `npm start` to start the backend server
+
   Run `npm run dev` to start the development server.
+
+
 
   ## Individual Chart Components
   1. **WeeklyActivityChart**: Shows daily meditation minutes with Chart 3's

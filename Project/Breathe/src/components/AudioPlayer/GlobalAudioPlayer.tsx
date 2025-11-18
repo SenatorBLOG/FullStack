@@ -34,7 +34,7 @@ export function GlobalAudioPlayer() {
   const [isVisible, setIsVisible] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Синхронизация воспроизведения с контекстом
+  // sync wwith playing context
   useEffect(() => {
     if (!audioRef.current) return;
 
@@ -47,7 +47,7 @@ export function GlobalAudioPlayer() {
     }
   }, [isPlaying]);
 
-  // Сброс при смене трека
+  // Relog when data change
   useEffect(() => {
     setCurrentTime(0);
     if (audioRef.current) {
@@ -60,7 +60,7 @@ export function GlobalAudioPlayer() {
     }
   }, [currentTrack?.id]);
 
-  // Обновление времени и обработка событий аудио
+  // Time update and audion 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -98,13 +98,13 @@ export function GlobalAudioPlayer() {
   };
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || seconds === 0) return "0:00"; // Унифицируем отображение для нулевого значения
+    if (isNaN(seconds) || seconds === 0) return "0:00"; // Unification for the 0 value
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
   
-  // Не показывать плеер если нет трека
+  // Dont show the player if its epmty
   if (!currentTrack || !isVisible) {
     return currentTrack ? (
       <audio ref={audioRef} src={currentTrack.audio} />

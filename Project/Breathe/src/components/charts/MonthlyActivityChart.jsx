@@ -4,12 +4,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Chart3Dropdown } from './Chart3StyleComponents';
 import api from '../../api';
 
-// === Цвета для пирога ===
+// === COlors for pie ===
 const PIE_COLORS = [
-  '#4A3AFF',  // Фиолетовый
-  '#962DFF',  // Тёмно-фиолетовый
-  '#E0C6FD',  // Светло-фиолетовый
-  '#C6D2FD',  // Голубой
+  '#4A3AFF',  
+  '#962DFF',  
+  '#E0C6FD',  
+  '#C6D2FD', 
 ];
 
 const MonthlyActivityChart = () => {
@@ -27,7 +27,7 @@ const MonthlyActivityChart = () => {
 
         const raw = Array.isArray(res.data) ? res.data : [];
 
-        // Преобразуем сессии в данные для пирога
+        // sessions to pie data
         const normalized = raw.map(item => {
           const minutes = Number(item.minutes ?? item.sessionLength ?? (item.time ? item.time / 60 : 0)) || 0;
           let name = 'Extended';
@@ -35,7 +35,7 @@ const MonthlyActivityChart = () => {
           else if (minutes <= 15) name = 'Medium';
           else if (minutes <= 30) name = 'Long';
 
-          return { name, value: 1 }; // value = кол-во сессий
+          return { name, value: 1 }; // value = amount  of sessions
         });
 
 
@@ -52,10 +52,10 @@ const MonthlyActivityChart = () => {
     return () => { mounted = false; };
   }, []);
 
-  // ======== Общая сумма ========
+  // === summary ===
   const total = useMemo(() => sessions.reduce((s, d) => s + (Number(d.value) || 0), 0), [sessions]);
 
-  // ======== Среднее время сессии ========
+  //  Average Sessions time 
   const avgMinutes = useMemo(() => {
     if (!total) return 0;
     const est = sessions.reduce((sum, item) => {
@@ -79,7 +79,7 @@ const MonthlyActivityChart = () => {
 
   return (
     <div className="rounded-2xl bg-gradient-to-br from-[#0F1E33] to-[#1A2F4D] backdrop-blur-sm border border-white/10 p-6 shadow-2xl">
-      {/* Заголовок + Дропдаун */}
+      {/* Header + Dropdown */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-2xl font-bold text-[#AEE6FF]">Session duration</h3>
@@ -94,7 +94,7 @@ const MonthlyActivityChart = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* Пирог */}
+        {/* Pie */}
         <div className="relative w-full aspect-square">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -121,7 +121,7 @@ const MonthlyActivityChart = () => {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* Центр */}
+          {/* Center */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <div className="text-5xl font-extrabold bg-gradient-to-r from-[#70B8FF] to-[#3A82F7] bg-clip-text text-transparent">
               {avgMinutes}
@@ -130,7 +130,7 @@ const MonthlyActivityChart = () => {
           </div>
         </div>
 
-        {/* Легенда */}
+        {/* Legend */}
         <div className="space-y-3">
           {sessions.map((item, i) => {
             const pct = total ? Math.round((Number(item.value || 0) / total) * 100) : 0;

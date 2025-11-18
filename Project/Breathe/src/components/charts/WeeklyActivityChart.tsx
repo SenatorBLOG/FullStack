@@ -6,7 +6,7 @@ import api from '../../api';
 
 interface Session {
   sessionDate: string;
-  sessionLength: number; // в минутах (0.2, 5, 10.5 и т.д.)
+  sessionLength: number; // in minutes 0.2
   cycles: number;
 }
 
@@ -29,7 +29,7 @@ const ActivityChart = () => {
         const weekData: { [key: string]: number } = {};
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-        // Заполняем последние 7 дней
+        // for last 7 days
         for (let i = 6; i >= 0; i--) {
           const date = new Date();
           date.setDate(date.getDate() - i);
@@ -44,14 +44,13 @@ const ActivityChart = () => {
 
           const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
           if (diffDays <= 6 && diffDays >= 0) {
-            // Правильно: НЕ округляем до целых, а суммируем как есть
             weekData[dayName] += s.sessionLength;
           }
         });
 
         const mapped = Object.entries(weekData).map(([name, value]) => ({
           name,
-          value: Math.round(value), // Округляем только для отображения
+          value: Math.round(value), // round for show
           active: name === days[now.getDay()],
         }));
 

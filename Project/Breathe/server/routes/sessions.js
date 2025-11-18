@@ -4,7 +4,7 @@ const router = express.Router();
 const Session = require('../models/Session');
 const authenticate = require('../middleware/auth');
 
-// GET /api/sessions — вернуть все сессии (только для аутентифицированного юзера)
+// GET /api/sessions — fetch all sessions(only for auth user)
 router.get('/', authenticate, async (req, res) => {
   try {
     const sessions = await Session.find({ userId: req.userId }).sort({ sessionDate: -1 });
@@ -14,7 +14,7 @@ router.get('/', authenticate, async (req, res) => {
   }
 });
 
-// DELETE /api/sessions — удалить все сессии (только для аутентифицированного юзера)
+// DELETE /api/sessions — delete all sessions (only for auth user)
 router.delete('/', authenticate, async (req, res) => {
   try {
     await Session.deleteMany({ userId: req.userId });
@@ -25,7 +25,7 @@ router.delete('/', authenticate, async (req, res) => {
   }
 });
 
-// POST /api/sessions — создать новую сессию (только для аутентифицированного юзера)
+// POST /api/sessions — create new session (only for auth user)
 router.post('/', authenticate, async (req, res) => {
   try {
     const {
@@ -58,7 +58,7 @@ router.post('/', authenticate, async (req, res) => {
       sessionLength,
       cycles,
       notes,
-      userId: req.userId // Добавляем привязку к пользователю
+      userId: req.userId // attach to user
     });
 
     await session.save();
@@ -70,11 +70,11 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
-// --- DEBUG endpoint, доступен только локально ---
+// --- DEBUG endpoint, local ---
 if (process.env.NODE_ENV === 'development') {
   router.get('/debug', async (req, res) => {
     try {
-      const sessions = await Session.find().lean(); // все сессии
+      const sessions = await Session.find().lean(); // all sessions
       res.json(sessions);
     } catch (err) {
       console.error(err.message);
@@ -82,7 +82,7 @@ if (process.env.NODE_ENV === 'development') {
     }
   });
 }
-// Только для локальной разработки
+// for local
 if (process.env.NODE_ENV === 'development') {
   router.delete('/debug/delete', async (req, res) => {
     try {

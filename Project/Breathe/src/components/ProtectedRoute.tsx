@@ -8,7 +8,7 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useContext(AuthContext);
   const location = useLocation();
   if (!isAuthenticated) {
-    // перенаправим на страницу превью статистики или на логин
+    // re-addresing to home page here
     return <Navigate to="/home-page" state={{ from: location }} replace />;
   }
   return children;

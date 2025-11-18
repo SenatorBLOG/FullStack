@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 
-// POST /api/auth/register - регистрация
+// POST /api/auth/register - reg
 router.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// POST /api/auth/login - логин
+// POST /api/auth/login - login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
