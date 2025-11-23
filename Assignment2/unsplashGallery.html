@@ -6,24 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Gallery</title>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
   <!-- Add your own styles -->
   <link rel="stylesheet" href="styles.css">
   <!-- JavaScript Files -->
-  <!-- Uncomment this to use Fetch -->
-
-  <!-- Uncomment this to use Axios -->
-  <!-- <script src="axios.js"></script> -->
 </head>
 
 <body>
   <h1>Unsplash Image Gallery</h1>
   <input type="text" id="searchQuery" placeholder="Enter image keyword">
   <input type="number" id="imageCount" placeholder="Number of images">
-  <button>Click to see results</button>
+  <button id="showBtn" type="button">Click to see results</button>
+
   <div id="gallery">
     
   </div>
-  <script src="fetchapi.js"></script> 
+  <!-- <script src="fetchapi.js"></script>  -->
+     <script src="axios.js"></script>
 </body>
 
 </html>

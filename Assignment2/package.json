@@ -5,8 +5,14 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "fetchapi.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2"
   }
 }
