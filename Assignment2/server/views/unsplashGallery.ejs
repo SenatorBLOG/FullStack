@@ -46,20 +46,22 @@
       <input id="imageCount" type="number" min="1" value="4"/>
       <button id="showBtn">Show Images (client)</button>
     </div>
-
+    <!-- Server side search -->
     <div id="gallery" class="gallery">
       <% images.forEach(function(item){ %>
-        <div class="card">
-          <img src="<%= item.urls.small %>" alt="<%= item.description || 'image' %>" />
-          <div class="meta">
-            <h4><%= item.photographer %></h4>
-            <p><%= item.description || 'No description' %></p>
-            <div class="small">
-              ❤️ <%= item.likes %> • <%= item.orientation %> •
-              <a href="<%= item.links && item.links.html ? item.links.html : item.urls.full %>" target="_blank" rel="noopener">Unsplash page</a>
-              <br />
-              <strong>Sizes:</strong> small: <%= item.urls.small %>, regular: <%= item.urls.regular || 'n/a' %>, full: <%= item.urls.full || 'n/a' %>
-            </div>
+        <div class="image-item">
+          <img src="<%= item.urls.small %>" alt="<%= item.description || item.alt_description || 'Image' %>">
+
+          <div class="image-details">
+            <p><strong>Photographer:</strong> <%= item.photographer %></p>
+            <p><strong>Description:</strong> <%= item.description || 'None' %></p>
+            <p><strong>Likes:</strong> <%= item.likes %></p>
+            <p><strong>Image URL:</strong> 
+              <a href="<%= item.links.html %>" target="_blank"><%= item.links.html %></a>
+            </p>
+            <p><strong>Orientation:</strong> <%= item.orientation %></p>
+            <p><strong>Full URL:</strong>
+               <a href="<%= item.urls.full %>" target="_blank" rel="noopener">View full</a></p>
           </div>
         </div>
       <% }); %>
@@ -68,7 +70,7 @@
   </div>
 
   <!-- client-side scripts from public/ -->
-  <script src="/fetchapi.js"></script>
+  <!-- <script src="/fetchapi.js"></script> -->
   <!-- <script src="/axios.js"></script> -->
 </body>
 </html>

@@ -37,9 +37,8 @@ app.get('/', (req, res) => {
 // POST /search -> validate, fetch from Unsplash, map results, render
 app.post('/search', async (req, res) => {
   try {
-    // NOTE: input name in your form should be "query" and "count"
-    const query = (req.body.query || '').trim();
-    const count = parseInt(req.body.count, 10) || 0;
+    const query = (req.body.searchQuery  || '').trim();
+    const count = parseInt(req.body.imageCount, 10) || 0;
 
     // Validation
     if (!query) {
@@ -61,10 +60,15 @@ app.post('/search', async (req, res) => {
 
     const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&client_id=${accessKey}`;
 
-    const response = await axios.get(url);
-    const results = response.data.results || [];
+    // //Axios GET request
+    // const response = await axios.get(url);
+    // const results = response.data.results || [];
 
-    // Map Unsplash items to the shape your EJS expects
+   // Fetch API GET request 
+     const response = await fetch(url);
+     const results = (await response.json()).results || [];
+
+    // Map Unsplash items to the shape EJS 
     const images = results.map(item => ({
       photographer: item.user && item.user.name ? item.user.name : 'Unknown',
       description: item.alt_description || item.description || '',
