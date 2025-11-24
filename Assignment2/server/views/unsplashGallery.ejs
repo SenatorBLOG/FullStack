@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Unsplash Gallery (Server-rendered)</title>
+  
   <style>
     body{ font-family: Inter, system-ui, sans-serif; background:#f8fafc; margin:20px; color:#0f172a; }
     .container{ max-width:1100px; margin:0 auto; }
@@ -13,7 +14,7 @@
     .error{ color:#b91c1c; margin-bottom:12px; }
     .gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
     .card{ background:white; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(2,6,23,0.06); }
-    .card img{ width:100%; height:180px; object-fit:cover; display:block; }
+    .card img{ width:100%; height:200px; object-fit:cover; display:block; }
     .meta{ padding:12px; }
     .meta h4{ margin:0 0 6px 0; font-size:15px; }
     .meta p{ margin:0; color:#475569; font-size:13px; }
@@ -49,10 +50,10 @@
     <!-- Server side search -->
     <div id="gallery" class="gallery">
       <% images.forEach(function(item){ %>
-        <div class="image-item">
+        <div class="card">
           <img src="<%= item.urls.small %>" alt="<%= item.description || item.alt_description || 'Image' %>">
 
-          <div class="image-details">
+          <div class="meta">
             <p><strong>Photographer:</strong> <%= item.photographer %></p>
             <p><strong>Description:</strong> <%= item.description || 'None' %></p>
             <p><strong>Likes:</strong> <%= item.likes %></p>
@@ -70,7 +71,7 @@
   </div>
 
   <!-- client-side scripts from public/ -->
-  <!-- <script src="/fetchapi.js"></script> -->
+  <script src="/fetchapi.js"></script>
   <!-- <script src="/axios.js"></script> -->
 </body>
 </html>

@@ -13,7 +13,6 @@ document.getElementById('showBtn').addEventListener('click', async () => {
   resultsDiv.innerHTML = ''; // clear
 
   try {
-    // Используем params — удобнее и безопаснее для кодирования
     const res = await axios.get('https://api.unsplash.com/search/photos', {
       params: {
         query: query,
@@ -34,10 +33,10 @@ document.getElementById('showBtn').addEventListener('click', async () => {
                           photo.height > photo.width ? 'portrait' : 'square';
 
       const card = document.createElement('div');
-      card.className = 'image-item';
+      card.className = 'card';
       card.innerHTML = `
         <img src="${photo.urls.small}" alt="${photo.alt_description || photo.description || 'Image'}">
-        <div class="image-details">
+        <div class="imeta">
           <p><strong>Photographer:</strong> ${photo.user?.name || 'Unknown'}</p>
           <p><strong>Description:</strong> ${photo.description || photo.alt_description || 'None'}</p>
           <p><strong>Likes:</strong> ${photo.likes}</p>
