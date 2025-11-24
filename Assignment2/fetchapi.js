@@ -10,10 +10,10 @@ document.getElementById('showBtn').addEventListener('click', async () => {
     }
 
     const resultsDiv = document.getElementById('gallery');
-    resultsDiv.innerHTML = '';  // Clear previous results
+    resultsDiv.innerHTML = '';  
 
     const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&client_id=${accessKey}`;
-    console.log('Fetching URL:', url);  // For debugging
+    console.log('Fetching URL:', url);  
 
     try {
         const response = await fetch(url);

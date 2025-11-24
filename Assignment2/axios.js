@@ -13,7 +13,6 @@ document.getElementById('showBtn').addEventListener('click', async () => {
   resultsDiv.innerHTML = ''; // clear
 
   try {
-    // Используем params — удобнее и безопаснее для кодирования
     const res = await axios.get('https://api.unsplash.com/search/photos', {
       params: {
         query: query,
