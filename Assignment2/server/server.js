@@ -11,13 +11,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
-const accessKey = process.env.UNSPLASH_ACCESS_KEY; // from .env
+const accessKey = process.env.UNSPLASH_ACCESS_KEY; 
 
 if (!accessKey) {
   console.warn('WARNING: No UNSPLASH_ACCESS_KEY found in .env');
 }
 
-// view engine + static + body parsing
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));

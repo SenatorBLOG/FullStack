@@ -10,10 +10,10 @@ document.getElementById('showBtn').addEventListener('click', async () => {
     }
 
     const resultsDiv = document.getElementById('gallery');
-    resultsDiv.innerHTML = '';  // Clear previous results
+    resultsDiv.innerHTML = '';  // Clear 
 
     const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&client_id=${accessKey}`;
-    console.log('Fetching URL:', url);  // For debugging
+    console.log('Fetching URL:', url);  
 
     try {
         const response = await fetch(url);
@@ -27,16 +27,16 @@ document.getElementById('showBtn').addEventListener('click', async () => {
                                 photo.height > photo.width ? 'portrait' : 'square';
 
             const card = document.createElement('div');
-            card.className = 'image-item';
+            card.className = 'card';
             card.innerHTML = `
                 <img src="${photo.urls.small}" alt="${photo.alt_description || photo.description || 'Image'}">
-                <div class="image-details">
+                <div class="meta">
                     <p><strong>Photographer:</strong> ${photo.user.name}</p>
                     <p><strong>Description:</strong> ${photo.description || photo.alt_description || 'None'}</p>
                     <p><strong>Likes:</strong> ${photo.likes}</p>
                     <p><strong>Image URL:</strong> <a href="${photo.links.html}" target="_blank">${photo.links.html}</a></p>
                     <p><strong>Orientation:</strong> ${orientation}</p>
-                    <p><strong>Full URL:</strong> ${photo.urls.full}</p>
+                    <p><strong>Full URL:</strong> <a href="${photo.urls.full}" target="_blank" rel="noopener">View full</a></p>
                 </div>
             `;
             resultsDiv.appendChild(card);

@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Inception",
+    "director": "Christopher Nolan",
+    "numberInStock": 7,
+    "price": 14.99,
+    "rating": 5,
+    "releaseDate": "2010-07-16T00:00:00.000Z",
+    "like": true,
+    "img": "inception.jpg"
+  },
+  {
+    "title": "The Matrix",
+    "director": "Lana Wachowski and Lilly Wachowski",
+    "numberInStock": 12,
+    "price": 12.49,
+    "rating": 4,
+    "releaseDate": "1999-03-31T00:00:00.000Z",
+    "like": false,
+    "img": "matrix.jpg"
+  },
+  {
+    "title": "Interstellar",
+    "director": "Christopher Nolan",
+    "numberInStock": 5,
+    "price": 15.99,
+    "rating": 5,
+    "releaseDate": "2014-11-07T00:00:00.000Z",
+    "like": true,
+    "img": "interstellar.jpg"
+  },
+  {
+    "title": "The Godfather",
+    "director": "Francis Ford Coppola",
+    "numberInStock": 3,
+    "price": 13.25,
+    "rating": 5,
+    "releaseDate": "1972-03-24T00:00:00.000Z",
+    "like": true,
+    "img": "godfather.jpg"
+  },
+  {
+    "title": "Parasite",
+    "director": "Bong Joon-ho",
+    "numberInStock": 6,
+    "price": 11.99,
+    "rating": 4,
+    "releaseDate": "2019-05-30T00:00:00.000Z",
+    "like": false,
+    "img": "parasite.jpg"
+  },
+  {
+    "title": "Avengers: Endgame",
+    "director": "Anthony and Joe Russo",
+    "numberInStock": 10,
+    "price": 16.5,
+    "rating": 3,
+    "releaseDate": "2019-04-26T00:00:00.000Z",
+    "like": true,
+    "img": "endgame.jpg"
+  },
+  {
+    "title": "La La Land",
+    "director": "Damien Chazelle",
+    "numberInStock": 4,
+    "price": 10.75,
+    "rating": 4,
+    "releaseDate": "2016-12-09T00:00:00.000Z",
+    "like": false,
+    "img": "lalaland.jpg"
+  },
+  {
+    "title": "Spirited Away",
+    "director": "Hayao Miyazaki",
+    "numberInStock": 8,
+    "price": 13.99,
+    "rating": 5,
+    "releaseDate": "2001-07-20T00:00:00.000Z",
+    "like": true,
+    "img": "spiritedaway.jpg"
+  },
+  {
+    "title": "Whiplash",
+    "director": "Damien Chazelle",
+    "numberInStock": 9,
+    "price": 11.5,
+    "rating": 5,
+    "releaseDate": "2014-10-10T00:00:00.000Z",
+    "like": false,
+    "img": "whiplash.jpg"
+  }
+]

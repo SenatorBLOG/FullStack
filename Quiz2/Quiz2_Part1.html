@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News API Fetch</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="server.js" defer></script>
+</head>
+
+<body>
+  <h1> Quiz 2 </h1>
+  <h3> --- Mikhail Senatorov 300407626 --- </h3>
+  <!-- ============= START OF QUESTION 1 ============ --->
+  <h1>News Articles</h1>
+  <label for="categorySelect">Select Category: </label>
+  <select id="categorySelect">
+    <option value="business">Business</option>
+    <option value="entertainment">Entertainment</option>
+    <option value="health">Health</option>
+    <option value="science">Science</option>
+    <option value="technology">Technology</option>
+  </select>
+  <button onclick="fetchNews()">Search</button>
+
+  <div id="results">
+    <!-- A randomly selected article will be displayed here -->
+  </div>
+  <script src="/axios.js"></script>
+</body>
+
+</html>
