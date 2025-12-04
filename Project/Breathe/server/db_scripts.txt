@@ -16,21 +16,20 @@ catch {
 # Количество записей
 $entriesCount = 10
 
-# Диапазон дат (1 год назад от сегодняшнего дня)
 $startDate = (Get-Date).AddYears(-1)
 $endDate = Get-Date
 
-# Случайные значения для полей
+
 $timeOfDayOptions = @("Morning", "Afternoon", "Evening", "Night")
 $moods = @("Happy", "Sad", "Calm", "Excited", "Tired", "Stressed", "Relaxed", "Anxious", "Neutral", "Joyful")
 
 1..$entriesCount | ForEach-Object {
     try {
-        # Генерация случайной даты
+
         $randomDate = Get-Date ((($startDate.Ticks) + (Get-Random -Minimum 0 -Maximum (($endDate.Ticks) - ($startDate.Ticks)))))
         $sessionDate = $randomDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
 
-        # Генерация случайных значений
+
         $moodBefore = $moods[(Get-Random -Minimum 0 -Maximum $moods.Count)]
         $moodAfter = $moods[(Get-Random -Minimum 0 -Maximum $moods.Count)]
         $focusLevel = Get-Random -Minimum 1 -Maximum 11  # 1-10
@@ -41,10 +40,10 @@ $moods = @("Happy", "Sad", "Calm", "Excited", "Tired", "Stressed", "Relaxed", "A
         $timeOfDay = $timeOfDayOptions[(Get-Random -Minimum 0 -Maximum $timeOfDayOptions.Count)]
         $noiseLevel = Get-Random -Minimum 1 -Maximum 11  # 1-10
         $sessionLength = Get-Random -Minimum 5 -Maximum 61  # 5-60
-        $cycles = Get-Random -Minimum 1 -Maximum 11  # 1-10 (default 1, но можем варьировать)
+        $cycles = Get-Random -Minimum 1 -Maximum 11  # 1-10 (default 1, )
         $notes = if ((Get-Random -Minimum 0 -Maximum 2) -eq 0) { "" } else { "Note $(Get-Random -Minimum 1 -Maximum 100)" }
 
-        # Формирование тела запроса
+
         $body = @{
             sessionDate    = $sessionDate
             moodBefore     = $moodBefore
@@ -61,7 +60,7 @@ $moods = @("Happy", "Sad", "Calm", "Excited", "Tired", "Stressed", "Relaxed", "A
             notes          = $notes
         } | ConvertTo-Json -Compress
 
-        # Отправка запроса
+
         $response = Invoke-RestMethod -Uri "http://localhost:5000/api/sessions" -Method POST -Body $body -ContentType "application/json" -ErrorAction Stop
         Write-Host "Successfully added session for $sessionDate with moodBefore: $moodBefore"
     }

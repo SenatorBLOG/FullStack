@@ -1,12 +1,12 @@
 
-##  Hello and welcome to ## Breathe
+##  Hello and welcome to Breathe
 
     The best way to stat it is to Clone from my Github:
-    https://github.com/SenatorBLOG/FullStack.git
+    https://github.com/SenatorBLOG/FullStack/tree/main/Project/Breathe
     then navigate to:
     Project/Breathe
 
-  # Breathe
+  # Breathe 
 
   ## Running the code
 
