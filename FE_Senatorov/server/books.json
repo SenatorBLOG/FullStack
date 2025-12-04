@@ -1,0 +1,102 @@
+[
+  {
+    "title": "The Silent Forest",
+    "author": "Laura Whitman",
+    "numberInStock": 12,
+    "price": 19.99,
+    "rating": 4,
+    "releaseDate": "2023-02-14T00:00:00.000Z",
+    "like": true,
+    "img": "forest.jpg"
+  },
+  {
+    "title": "Quantum Dreams",
+    "author": "Mark Johnson",
+    "numberInStock": 8,
+    "price": 24.5,
+    "rating": 5,
+    "releaseDate": "2022-10-01T00:00:00.000Z",
+    "like": false,
+    "img": "quantum.jpg"
+  },
+  {
+    "title": "River of Stars",
+    "author": "Hannah Lee",
+    "numberInStock": 5,
+    "price": 15.99,
+    "rating": 3,
+    "releaseDate": "2021-08-21T00:00:00.000Z",
+    "like": true,
+    "img": "river.jpg"
+  },
+  {
+    "title": "The Last Archive",
+    "author": "Thomas Reed",
+    "numberInStock": 20,
+    "price": 29.0,
+    "rating": 4,
+    "releaseDate": "2024-04-10T00:00:00.000Z",
+    "like": false,
+    "img": "archive.jpg"
+  },
+  {
+    "title": "Fragments of Us",
+    "author": "Emily Parker",
+    "numberInStock": 7,
+    "price": 17.0,
+    "rating": 5,
+    "releaseDate": "2020-12-01T00:00:00.000Z",
+    "like": true,
+    "img": "fragments.jpg"
+  },
+  {
+    "title": "Beyond the Horizon",
+    "author": "Ahmed Sayeed",
+    "numberInStock": 14,
+    "price": 21.99,
+    "rating": 4,
+    "releaseDate": "2019-05-30T00:00:00.000Z",
+    "like": false,
+    "img": "horizon.jpg"
+  },
+  {
+    "title": "The Ember Code",
+    "author": "Sophia Martinez",
+    "numberInStock": 10,
+    "price": 26.5,
+    "rating": 5,
+    "releaseDate": "2023-06-12T00:00:00.000Z",
+    "like": true,
+    "img": "ember.jpg"
+  },
+  {
+    "title": "Dark Matter Rising",
+    "author": "Jason Cole",
+    "numberInStock": 9,
+    "price": 18.75,
+    "rating": 3,
+    "releaseDate": "2018-11-03T00:00:00.000Z",
+    "like": false,
+    "img": "darkmatter.jpg"
+  },
+  {
+    "title": "Hidden Paths",
+    "author": "Nora Wilson",
+    "numberInStock": 6,
+    "price": 14.99,
+    "rating": 2,
+    "releaseDate": "2021-03-17T00:00:00.000Z",
+    "like": true,
+    "img": "paths.jpg"
+  },
+  {
+    "title": "The Infinite Loop",
+    "author": "Caleb Turner",
+    "numberInStock": 4,
+    "price": 27.99,
+    "rating": 5,
+    "releaseDate": "2022-07-09T00:00:00.000Z",
+    "like": false,
+    "img": "loop.jpg"
+  }
+]

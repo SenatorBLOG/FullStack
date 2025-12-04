@@ -44,7 +44,7 @@ export default function Footer() {
             <FaInstagram size={18} />
           </a>
           <a
-            href="https://github.com/"
+            href="https://github.com/SenatorBLOG.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#9CCBFF] hover:text-white transition-colors"

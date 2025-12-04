@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import api from '../api';
 import { toast } from 'sonner';
+import Footer from '../components/Footer';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -18,10 +19,10 @@ export default function SignUpPage() {
     try {
       const res = await api.post('/auth/register', { email, password });
       localStorage.setItem('token', res.data.token);
-      toast.success('Аккаунт создан! Добро пожаловать в Breathe');
+      toast.success('Account created! Welcome to Breathe');
       navigate('/');
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Не удалось создать аккаунт';
+      const msg = err.response?.data?.error || 'Failed to create an account';
       setError(msg);
       toast.error(msg);
     } finally {
@@ -31,9 +32,6 @@ export default function SignUpPage() {
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* Background with gradient + blur */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A1F3D] via-[#0F1E33] to-[#1A2F4D] opacity-90" />
-      <div className="absolute inset-0 backdrop-blur-3xl" />
       
       {/* stars */}
       <div className="absolute inset-0">
@@ -66,7 +64,7 @@ export default function SignUpPage() {
               </h1>
               <p className="text-xl text-[#88AACC] font-light">
                 Welcome to <span className="font-semibold text-[#70B8FF]">Breathe</span>.<br />
-                Начни свой путь к внутреннему спокойствию прямо сейчас.
+               Start your own path to meditatio calmnes
               </p>
             </div>
 
@@ -113,7 +111,7 @@ export default function SignUpPage() {
                     disabled={loading}
                     className="flex-1 py-5 bg-gradient-to-r from-[#3A82F7] to-[#70B8FF] rounded-2xl font-semibold text-white text-lg hover:shadow-xl hover:shadow-[#3A82F7]/30 transition-all disabled:opacity-70"
                   >
-                    {loading ? 'Создаём...' : 'Sign Up'}
+                    {loading ? 'Creating...' : 'Sign Up'}
                   </button>
                   <Link
                     to="/login"
@@ -143,10 +141,7 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      {/* Footer  */}
-      <footer className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/50 to-transparent flex items-center justify-center">
-        <p className="text-[#88AACC] text-sm">© 2025 Breathe. All rights reserved.</p>
-      </footer>
+      <Footer/>
     </div>
   );
 }

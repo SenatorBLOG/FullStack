@@ -4,6 +4,7 @@ import NavBar from '../components/NavBar';
 import api from '../api';
 import { toast } from 'sonner';
 import { AuthContext } from '../components/contexts/AuthContext';
+import Footer from '../components/Footer';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -37,11 +38,9 @@ description: 'You have entered your world of peace'
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
       {/* Background — space + blue */}
-<div className="absolute inset-0 bg-gradient-to-br from-[#0A1F3D] via-[#0F1E33] to-[#1A2F4D] opacity-95" />
-<div className="absolute inset-0 backdoor-blur-3xl" />
       
       {/* Stars (animation) */}
-<div className="absolute inset-0">
+      <div className="absolute inset-0">
 {[...Array(80)].map((_, i) => (
 <div
             key={i}
@@ -176,12 +175,7 @@ Registration
         </div>
       </div>
 
-      {/* Footer — transparent, as in space */}
-      <footer className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end justify-center pb-4">
-        <p className="text-[#88AACC] text-sm font-light">
-          © 2025 Breathe. Meditation is not a luxury. It's a necessity.
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }

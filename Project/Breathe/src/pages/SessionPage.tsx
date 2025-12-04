@@ -64,15 +64,13 @@ export default function SessionsPage() {
     }
   };
 
-  return (
-    <div className="relative min-h-screen bg-[#0A0F1F]">
+  return (<>
+    <div className="relative bg-[#001F3F]">
       {/* Navigation Bar */}
-      <div className="relative z-10">
         <NavBar />
-      </div>
 
       {/* Main Content */}
-      <div className="relative z-10 px-[157px] py-12">
+      <div className="relative px-[157px] py-12">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-[#70B8FF] text-[36px] font-normal font-montserrat">
             My Meditation Sessions
@@ -163,9 +161,8 @@ export default function SessionsPage() {
       </div>
 
       {/* Footer */}
-      <div className="relative z-[999]">
-        <Footer />
-      </div>
+        
     </div>
+    <Footer /></>
   );
 }

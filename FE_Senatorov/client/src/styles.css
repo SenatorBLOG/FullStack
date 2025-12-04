@@ -1,0 +1,18 @@
+.books{
+    display:flex;
+    flex-wrap: wrap;
+    background-color: antiquewhite;
+}
+.book{
+    width:30%;
+    /* height:200px; */
+    background-color: lightpink;
+    padding:1em;
+    margin:1em;
+}
+img{
+    max-width: 100%;
+    height:auto;
+    display:block;
+    margin:auto;
+}

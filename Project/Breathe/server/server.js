@@ -18,8 +18,8 @@ console.log("DEBUG: connecting to", MONGO_URI);
 
 mongoose
   .connect(MONGO_URI)
-  .then(() => console.log("✅ Connected to MongoDB Atlas"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err.message));
+  .then(() => console.log("Connected to MongoDB Atlas"))
+  .catch((err) => console.error("MongoDB connection error:", err.message));
 
 // routes
 const sessionsRouter = require('./routes/sessions');
@@ -32,7 +32,7 @@ app.use('/api/stats', statsRouter);
 
 // test
 app.get('/', (req, res) => {
-  res.send('🌬️ Breathe server is running and connected to MongoDB!');
+  res.send('Breathe server is running and connected to MongoDB!');
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
