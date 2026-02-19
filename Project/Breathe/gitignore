@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 
 BreatheDB_keys.txt
+.env
